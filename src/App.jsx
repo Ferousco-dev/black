@@ -30,7 +30,7 @@ function ProtectedRoute({ children }) {
 
 function AppLayout() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', width: '100%', overflowX: 'hidden' }}>
       <Navbar />
       <div style={{ flex: 1 }}>
         <Routes>

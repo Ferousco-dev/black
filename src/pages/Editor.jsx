@@ -162,7 +162,7 @@ export default function Editor() {
     <div className="editor-page">
       <div className="editor-topbar">
         <button className="btn btn-ghost btn-sm" onClick={() => navigate('/dashboard')}>← Dashboard</button>
-        <div className="editor-topbar-center">
+        <div className="editor-topbar-center hide-mobile">
           {words > 0 && (
             <span className="editor-stats">{words.toLocaleString()} words · {readingTime(words)}</span>
           )}
@@ -171,7 +171,7 @@ export default function Editor() {
         </div>
         <div className="editor-topbar-right">
           <button className={`btn btn-ghost btn-sm ${showSettings?'active':''}`} onClick={() => setShowSettings(s=>!s)} title="Post settings">
-            <SettingsIcon/> Settings
+            <SettingsIcon/> <span className="hide-mobile">Settings</span>
           </button>
           <button className="btn btn-secondary btn-sm" onClick={()=>handleSave(false)} disabled={saving}>
             {saving ? <span className="spinner" style={{width:14,height:14}}/> : 'Save draft'}

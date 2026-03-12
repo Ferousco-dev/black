@@ -109,6 +109,27 @@
 .editor-topbar { position: relative; }
 .btn.active { background: var(--navy-pale); color: var(--navy); }
 
+@media (max-width: 640px) {
+  .editor-topbar {
+    padding: 0 12px;
+    height: 60px;
+    gap: 8px;
+  }
+  .hide-mobile {
+    display: none !important;
+  }
+  .editor-topbar-right {
+    gap: 6px;
+  }
+  .editor-topbar-right .btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  .editor-topbar-center {
+    display: none;
+  }
+}
+
 /* ── Settings panel ───────────────────────────────────────── */
 .editor-settings-panel {
   width: 280px; flex-shrink: 0;
