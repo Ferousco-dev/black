@@ -1,0 +1,12 @@
+.highlight-popover { position: absolute; z-index: 200; background: #1a1a2e; color: white; border-radius: 8px; padding: 4px 6px; display: flex; align-items: center; gap: 4px; transform: translateX(-50%); box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: fadeUp 0.15s ease; }
+@keyframes fadeUp { from { opacity:0; transform: translateX(-50%) translateY(6px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+.highlight-pop-btn { background: none; border: none; color: white; font-size: 0.82rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; white-space: nowrap; font-family: var(--font-sans); }
+.highlight-pop-btn:hover { background: rgba(255,255,255,0.15); }
+.highlight-pop-close { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 1rem; cursor: pointer; padding: 0 4px; line-height: 1; }
+.highlights-list { margin-top: 40px; border-top: 1px solid var(--border-light); padding-top: 28px; }
+.highlights-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 16px; }
+.highlight-item { display: flex; gap: 12px; margin-bottom: 16px; }
+.highlight-bar { width: 3px; border-radius: 3px; background: #fbbf24; flex-shrink: 0; }
+.highlight-content { flex: 1; }
+.highlight-text { font-family: var(--font-serif); font-size: 0.95rem; color: var(--text-secondary); font-style: italic; line-height: 1.6; margin-bottom: 4px; }
+.highlight-author { font-size: 0.75rem; color: var(--text-muted); }

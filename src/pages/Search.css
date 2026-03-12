@@ -1,0 +1,15 @@
+.search-page { padding: 2.5rem 0 5rem; min-height: 80vh; }
+.search-hero { max-width: 600px; margin: 0 auto 2.5rem; }
+.search-title { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 1.25rem; }
+.search-bar { display: flex; align-items: center; gap: 10px; background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
+.search-bar:focus-within { border-color: var(--navy); }
+.search-bar svg { color: var(--text-muted); flex-shrink: 0; }
+.search-bar-input { flex: 1; border: none; outline: none; font-size: 1rem; font-family: var(--font-sans); color: var(--text-primary); background: transparent; }
+.search-bar-input::placeholder { color: var(--text-muted); }
+.search-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border-light); margin-bottom: 1.5rem; }
+.authors-grid { display: flex; flex-direction: column; gap: 12px; }
+.author-result { display: flex; align-items: flex-start; gap: 14px; padding: 20px; transition: box-shadow 0.15s; }
+.author-result:hover { box-shadow: var(--shadow); }
+.author-result-name { font-weight: 600; font-size: 0.95rem; }
+.author-result-handle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+.author-result-bio { font-size: 0.85rem; color: var(--text-secondary); }

@@ -1,0 +1,16 @@
+.home-page { padding: 2rem 0 4rem; min-height: 80vh; }
+.home-layout { display: grid; grid-template-columns: 1fr 280px; gap: 64px; align-items: start; }
+.home-header { margin-bottom: 8px; padding-bottom: 20px; border-bottom: 2px solid var(--navy); }
+.home-title { font-family: var(--font-serif); font-size: 1.5rem; color: var(--navy); }
+.posts-list { }
+.load-more { text-align: center; padding: 2rem 0; }
+.home-sidebar { position: sticky; top: 80px; }
+.sidebar-section { padding: 20px 0; }
+.sidebar-title { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 10px; }
+.sidebar-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+.sidebar-divider { height: 1px; background: var(--border-light); }
+.sidebar-actions { }
+@media (max-width: 900px) {
+  .home-layout { grid-template-columns: 1fr; }
+  .home-sidebar { display: none; }
+}

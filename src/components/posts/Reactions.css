@@ -1,0 +1,6 @@
+.reactions-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+.reaction-btn { display: flex; align-items: center; gap: 4px; padding: 5px 10px; border: 1.5px solid var(--border); border-radius: 32px; background: white; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; font-family: var(--font-sans); }
+.reaction-btn:hover { border-color: var(--navy); background: var(--navy-pale, #eef2ff); transform: scale(1.05); }
+.reaction-btn.active { border-color: var(--navy); background: var(--navy-pale, #eef2ff); }
+.reaction-emoji { font-size: 1rem; }
+.reaction-count { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }

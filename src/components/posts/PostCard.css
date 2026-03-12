@@ -1,0 +1,101 @@
+.post-card {
+  background: var(--white);
+  border-bottom: 1px solid var(--border-light);
+  padding: 28px 0;
+  transition: none;
+}
+.post-card:last-child { border-bottom: none; }
+.post-card-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.author-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.author-link:hover { color: var(--navy); }
+.author-name { font-weight: 500; }
+.post-date { font-size: 0.8rem; color: var(--text-muted); margin-left: auto; }
+.post-card-body {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+.post-card-content { flex: 1; min-width: 0; }
+.post-card-title-link:hover .post-card-title { color: var(--navy-light); }
+.post-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 6px;
+  transition: color 0.15s;
+}
+.post-card-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.post-card-excerpt {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.post-card-image-link { flex-shrink: 0; }
+.post-card-image {
+  width: 140px;
+  height: 94px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+.post-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+.post-card-meta { display: flex; align-items: center; gap: 8px; }
+.meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--navy-pale);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.meta-tag {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+.post-card-stats { display: flex; align-items: center; gap: 14px; }
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+@media (max-width: 600px) {
+  .post-card-image { width: 90px; height: 60px; }
+  .post-card-title { font-size: 1.1rem; }
+}

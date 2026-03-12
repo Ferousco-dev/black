@@ -1,0 +1,30 @@
+.post-view-page { padding: 3rem 0 5rem; }
+.post-view-author { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+.post-view-author-link { display: flex; align-items: center; gap: 12px; }
+.author-fullname { font-weight: 600; font-size: 0.95rem; }
+.author-meta { font-size: 0.8rem; color: var(--text-muted); }
+.post-view-header { margin-bottom: 2rem; }
+.post-view-title { font-family: var(--font-serif); font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+.post-view-subtitle { font-size: 1.2rem; color: var(--text-secondary); font-weight: 400; line-height: 1.5; }
+.post-view-cover { margin-bottom: 2.5rem; border-radius: var(--radius); overflow: hidden; }
+.post-view-cover img { width: 100%; max-height: 480px; object-fit: cover; }
+.post-view-content { margin-bottom: 3rem; }
+.post-view-pdf { margin: 2.5rem 0; }
+.pdf-card { display: flex; align-items: center; gap: 16px; padding: 20px; background: var(--navy-pale); border-radius: var(--radius); border: 1px solid var(--border); }
+.pdf-icon { color: var(--navy); flex-shrink: 0; }
+.pdf-info { flex: 1; min-width: 0; }
+.pdf-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdf-label { font-size: 0.775rem; color: var(--text-muted); }
+.post-view-actions { display: flex; align-items: center; gap: 8px; padding: 1.5rem 0; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); margin-bottom: 1.5rem; }
+.action-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 100px; background: white; font-size: 0.875rem; color: var(--text-secondary); font-family: var(--font-sans); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.action-btn:hover { border-color: var(--navy); color: var(--navy); }
+.action-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+.post-view-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2.5rem; }
+.author-card { padding: 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 3rem; }
+.author-card-link { display: flex; align-items: center; gap: 14px; flex: 1; }
+.author-card-name { font-weight: 600; font-size: 1rem; }
+.author-card-handle { font-size: 0.8rem; color: var(--text-muted); }
+@media (max-width: 600px) {
+  .post-view-title { font-size: 1.8rem; }
+  .post-view-author { flex-direction: column; align-items: flex-start; gap: 12px; }
+}

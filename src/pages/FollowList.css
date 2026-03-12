@@ -1,0 +1,11 @@
+.followlist-page { padding: 2.5rem 0 5rem; min-height: 80vh; }
+.followlist-header { margin-bottom: 2rem; }
+.followlist-title { font-family: var(--font-serif); font-size: 1.75rem; margin-top: 10px; }
+.followlist-name { font-weight: 400; color: var(--text-muted); }
+.followlist-users { display: flex; flex-direction: column; gap: 10px; }
+.followlist-user { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; transition: box-shadow 0.15s; }
+.followlist-user:hover { box-shadow: var(--shadow); }
+.followlist-user-info { flex: 1; }
+.followlist-user-name { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
+.followlist-user-handle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+.followlist-user-bio { font-size: 0.85rem; color: var(--text-secondary); }

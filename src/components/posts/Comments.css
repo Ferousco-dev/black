@@ -1,0 +1,38 @@
+.comments-section { padding: 3rem 0 2rem; border-top: 1px solid var(--border-light); }
+.comments-title { font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 1.5rem; }
+.comment-form { display: flex; gap: 12px; margin-bottom: 2rem; align-items: flex-start; }
+.comment-form-input { flex: 1; }
+.replying-to {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--navy-pale);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.cancel-reply { background: none; border: none; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; }
+.cancel-reply:hover { color: var(--danger); }
+.comment-form-actions { margin-top: 8px; display: flex; justify-content: flex-end; }
+.comments-signin { margin-bottom: 2rem; }
+.no-comments { color: var(--text-muted); font-size: 0.9rem; padding: 1rem 0; }
+.comments-list { display: flex; flex-direction: column; gap: 0; }
+.comment {
+  display: flex;
+  gap: 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.comment:last-child { border-bottom: none; }
+.comment-reply { padding-left: 48px; padding-top: 12px; padding-bottom: 12px; border-top: 1px solid var(--border-light); border-bottom: none; }
+.comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.comment-author { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+.comment-author:hover { color: var(--navy-light); }
+.comment-time { font-size: 0.775rem; color: var(--text-muted); }
+.comment-edited { font-size: 0.75rem; color: var(--text-muted); font-style: italic; }
+.comment-content { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; }
+.comment-actions { display: flex; gap: 12px; margin-top: 8px; }
+.comment-action { background: none; border: none; font-size: 0.775rem; color: var(--text-muted); cursor: pointer; font-family: var(--font-sans); padding: 0; }
+.comment-action:hover { color: var(--navy); }
+.comment-action-danger:hover { color: var(--danger); }

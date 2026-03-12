@@ -1,0 +1,27 @@
+.dashboard-page { padding: 2.5rem 0 5rem; min-height: 80vh; }
+.dashboard-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; }
+.dashboard-title { font-family: var(--font-serif); font-size: 2rem; margin-bottom: 4px; }
+.dashboard-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+.dashboard-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 2.5rem; }
+.stat-card { padding: 20px 24px; }
+.stat-number { font-family: var(--font-serif); font-size: 2rem; font-weight: 700; color: var(--navy); }
+.stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+.dashboard-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border-light); margin-bottom: 1.5rem; }
+.tab { padding: 10px 20px; background: none; border: none; font-size: 0.9rem; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: var(--font-sans); transition: all 0.15s; }
+.tab:hover { color: var(--navy); }
+.tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+.posts-table { display: flex; flex-direction: column; }
+.post-row { display: flex; align-items: center; gap: 16px; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border-light); }
+.post-row:last-child { border-bottom: none; }
+.post-row-main { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+.post-row-thumb { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.post-row-info { flex: 1; min-width: 0; }
+.post-row-title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post-row-subtitle { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post-row-meta { display: flex; align-items: center; gap: 6px; font-size: 0.775rem; color: var(--text-muted); margin-top: 4px; }
+.post-row-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+@media (max-width: 768px) {
+  .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
+  .post-row { flex-direction: column; align-items: flex-start; }
+  .post-row-actions { flex-wrap: wrap; }
+}

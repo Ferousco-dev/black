@@ -1,0 +1,19 @@
+.tip-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.tip-modal { background: white; border-radius: 16px; padding: 28px; width: 100%; max-width: 400px; position: relative; animation: popIn 0.2s ease; }
+@keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.tip-close { position: absolute; top: 14px; right: 14px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); line-height: 1; }
+.tip-header { display: flex; gap: 14px; align-items: center; margin-bottom: 24px; }
+.tip-recipient-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+.tip-title { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+.tip-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+.tip-amounts { display: flex; gap: 8px; margin-bottom: 12px; }
+.tip-amount-btn { flex: 1; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: white; font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: var(--font-sans); transition: all 0.15s; }
+.tip-amount-btn:hover { border-color: var(--navy); }
+.tip-amount-btn.active { border-color: var(--navy); background: var(--navy); color: white; }
+.tip-custom-row { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+.tip-custom-prefix { padding: 10px 10px 10px 14px; color: var(--text-muted); background: var(--off-white); font-size: 0.9rem; }
+.tip-custom-input { flex: 1; padding: 10px 12px; border: none; outline: none; font-size: 0.9rem; font-family: var(--font-sans); }
+.tip-message-input { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.875rem; font-family: var(--font-sans); resize: none; margin-bottom: 16px; outline: none; }
+.tip-message-input:focus { border-color: var(--navy); }
+.tip-submit { width: 100%; padding: 12px; font-size: 1rem; }
+.tip-note { font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-top: 10px; }

@@ -1,0 +1,15 @@
+.profile-page { min-height: 80vh; }
+.profile-header { background: var(--white); border-bottom: 1px solid var(--border-light); padding: 3rem 0; }
+.profile-header-inner { display: flex; gap: 24px; align-items: flex-start; }
+.profile-avatar { width: 80px; height: 80px; font-size: 1.75rem; flex-shrink: 0; }
+.profile-info { flex: 1; }
+.profile-name { font-family: var(--font-serif); font-size: 1.75rem; margin-bottom: 4px; }
+.profile-handle { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 10px; }
+.profile-bio { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; max-width: 480px; }
+.profile-stats { display: flex; gap: 20px; font-size: 0.875rem; color: var(--text-muted); }
+.profile-stats strong { color: var(--text-primary); }
+.profile-actions { display: flex; flex-direction: column; flex-shrink: 0; }
+@media (max-width: 600px) {
+  .profile-header-inner { flex-direction: column; }
+  .profile-avatar { width: 64px; height: 64px; font-size: 1.4rem; }
+}
