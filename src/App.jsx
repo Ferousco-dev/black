@@ -42,8 +42,6 @@ function AppLayout() {
           <Route path="/search" element={<Search />} />
           <Route path="/discover" element={<Discovery />} />
           <Route path="/p/:slug" element={<PostView />} />
-          <Route path="/@:username" element={<Profile />} />
-          <Route path="/@:username/:type" element={<FollowList />} />
           <Route path="/community/:username" element={<Community />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/dashboard/new" element={<ProtectedRoute><Editor /></ProtectedRoute>} />
@@ -54,6 +52,8 @@ function AppLayout() {
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmarks /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/:atUsername" element={<Profile />} />
+          <Route path="/:atUsername/:type" element={<FollowList />} />
           <Route path="*" element={
             <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
               <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '5rem', color: 'var(--navy)', lineHeight: 1 }}>404</h1>

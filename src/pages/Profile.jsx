@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import './Profile.css';
 
 export default function Profile() {
-  const { username } = useParams();
+  const { atUsername } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
@@ -22,8 +22,12 @@ export default function Profile() {
   const isOwnProfile = user?.id === profile?.id;
 
   useEffect(() => {
-    loadProfile();
-  }, [username]);
+    if (atUsername?.startsWith('@')) {
+      loadProfile();
+    } else {
+      setLoading(false);
+    }
+  }, [atUsername]);
 
   useEffect(() => {
     if (profile && user && !isOwnProfile) {
@@ -33,7 +37,7 @@ export default function Profile() {
   }, [profile, user]);
 
   const loadProfile = async () => {
-    const clean = username.startsWith('@') ? username.slice(1) : username;
+    const clean = atUsername.startsWith('@') ? atUsername.slice(1) : atUsername;
     const { data: prof, error } = await getProfileByUsername(clean);
     if (error || !prof) { setLoading(false); return; }
     setProfile(prof);

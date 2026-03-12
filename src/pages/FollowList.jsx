@@ -4,18 +4,22 @@ import { getProfileByUsername, getFollowers, getFollowing } from '../lib/api';
 import './FollowList.css';
 
 export default function FollowList() {
-  const { username, type } = useParams(); // type = 'followers' or 'following'
+  const { atUsername, type } = useParams(); // type = 'followers' or 'following'
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    load();
-  }, [username, type]);
+    if (atUsername?.startsWith('@')) {
+      load();
+    } else {
+      navigate('/');
+    }
+  }, [atUsername, type]);
 
   const load = async () => {
-    const clean = username.startsWith('@') ? username.slice(1) : username;
+    const clean = atUsername.startsWith('@') ? atUsername.slice(1) : atUsername;
     const { data: prof } = await getProfileByUsername(clean);
     if (!prof) { navigate('/'); return; }
     setProfile(prof);
