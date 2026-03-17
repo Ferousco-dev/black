@@ -147,6 +147,43 @@
 .setting-toggle-label { display: flex; align-items: center; justify-content: space-between; }
 .char-count { font-size: 0.7rem; color: var(--text-muted); float: right; margin-top: 3px; }
 .form-input-sm { font-size: 0.85rem !important; padding: 7px 10px !important; }
+.seo-preview { 
+  background: var(--white);
+  border-left: 3px solid var(--navy);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+.seo-preview-box {
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--off-white);
+}
+.seo-preview-title {
+  color: #1a0dab;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.seo-preview-url {
+  color: #006621;
+  font-size: 0.75rem;
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+.seo-preview-desc {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.seo-hint {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
 
 /* Audience options */
 .audience-options { display: flex; flex-direction: column; gap: 6px; }

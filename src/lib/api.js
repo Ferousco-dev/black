@@ -96,18 +96,26 @@ export const uploadAvatar = async (userId, file) => {
 // POSTS
 // ============================================================
 export const createPost = async (postData) => {
+  const payload = {
+    ...postData,
+    seo_title: postData.seo_title || postData.title,
+  };
   const { data, error } = await supabase
     .from("posts")
-    .insert(postData)
+    .insert(payload)
     .select()
     .single();
   return { data, error };
 };
 
 export const updatePost = async (postId, updates) => {
+  const payload = {
+    ...updates,
+    seo_title: updates.seo_title || updates.title,
+  };
   const { data, error } = await supabase
     .from("posts")
-    .update(updates)
+    .update(payload)
     .eq("id", postId)
     .select()
     .single();

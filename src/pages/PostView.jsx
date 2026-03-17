@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { format, formatDistanceToNow } from 'date-fns';
+import { Helmet } from 'react-helmet';
 import { getPost, likePost, unlikePost, checkPostLiked, bookmarkPost, unbookmarkPost, checkBookmarked, checkSubscribed, subscribeToUser, unsubscribeFromUser, upsertReadingHistory, getPostTopics, getPostsByTopic, getPostsByTags } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import Comments from '../components/posts/Comments';
@@ -44,24 +45,6 @@ export default function PostView() {
       checkSubscribed(user.id, post.author_id).then(({ subscribed }) => setSubscribed(subscribed));
     }
   }, [post, user]);
-
-  useEffect(() => {
-    if (!post) return;
-    const description = getShareExcerpt(post);
-    const ogImage = post.cover_image_url || `${window.location.origin}/android-chrome-512x512.png`;
-    const url = window.location.href;
-    document.title = `${post.title} — Chronicles`;
-    upsertMeta('name', 'description', description);
-    upsertMeta('property', 'og:type', 'article');
-    upsertMeta('property', 'og:title', post.title);
-    upsertMeta('property', 'og:description', description);
-    upsertMeta('property', 'og:image', ogImage);
-    upsertMeta('property', 'og:url', url);
-    upsertMeta('name', 'twitter:card', 'summary_large_image');
-    upsertMeta('name', 'twitter:title', post.title);
-    upsertMeta('name', 'twitter:description', description);
-    upsertMeta('name', 'twitter:image', ogImage);
-  }, [post]);
 
   useEffect(() => {
     if (!shareOpen) return undefined;
@@ -268,11 +251,28 @@ export default function PostView() {
   const shareMeta = buildShareMeta(post);
   const shareExcerpt = getShareExcerpt(post);
   const shareAuthor = post.author_full_name || post.author_username || 'Chronicles';
+  const seoTitle = post.seo_title || post.title;
+  const seoDescription = post.seo_description || shareExcerpt;
+  const ogImage = post.cover_image_url || `${window.location.origin}/android-chrome-512x512.png`;
+  const canonicalUrl = typeof window !== 'undefined' ? window.location.href : '';
   const shareHeading = shareMode === 'quote' ? 'Share this quote' : 'Share this post';
   const shareSub = shareMode === 'quote' ? 'Turn a highlight into a share card.' : 'Generate a shareable link and visual preview.';
 
   return (
     <div className="post-view-page">
+      <Helmet>
+        <title>{seoTitle} — Chronicles</title>
+        <meta name="description" content={seoDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={ogImage} />
+      </Helmet>
       <div className="container-narrow">
         {/* Author header */}
         <div className="post-view-author">
@@ -503,17 +503,6 @@ export default function PostView() {
     </div>
   );
 }
-
-const upsertMeta = (attr, key, content) => {
-  const selector = `meta[${attr}="${key}"]`;
-  let tag = document.querySelector(selector);
-  if (!tag) {
-    tag = document.createElement('meta');
-    tag.setAttribute(attr, key);
-    document.head.appendChild(tag);
-  }
-  tag.setAttribute('content', content);
-};
 
 const stripHtml = (value = '') => value.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
 

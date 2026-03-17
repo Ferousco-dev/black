@@ -157,6 +157,12 @@ export default function Editor() {
   };
 
   const words = wordCount(content);
+  const plainContent = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const previewTitle = (seoTitle.trim() || title.trim()).slice(0, 70);
+  const previewDesc = (seoDesc.trim() || subtitle.trim() || plainContent.slice(0, 160)).slice(0, 170);
+  const previewUrl = `https://chronicles.com/p/${title ? title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').slice(0, 40) : 'your-post'}`;
+  const titleWarning = !seoTitle.trim() && title.length > 60;
+  const descWarning = !seoDesc.trim() && previewDesc.length > 155;
 
   return (
     <div className="editor-page">
@@ -258,12 +264,24 @@ export default function Editor() {
               <label className="setting-label">SEO Title</label>
               <input className="form-input form-input-sm" placeholder="Custom title for search engines" value={seoTitle} onChange={e=>setSeoTitle(e.target.value)} maxLength={60}/>
               <span className="char-count">{seoTitle.length}/60</span>
+              {titleWarning && <span className="seo-hint">Post title is longer than 60 characters. Add a shorter SEO title.</span>}
             </div>
 
             <div className="setting-group">
               <label className="setting-label">SEO Description</label>
               <textarea className="form-input form-input-sm" rows={3} placeholder="Custom description for search engines and social sharing" value={seoDesc} onChange={e=>setSeoDesc(e.target.value)} maxLength={160}/>
               <span className="char-count">{seoDesc.length}/160</span>
+              {descWarning && <span className="seo-hint">Description is long. Search results may truncate it.</span>}
+            </div>
+
+            <div className="setting-group seo-preview">
+              <label className="setting-label">Google Preview</label>
+              <div className="seo-preview-box">
+                <div className="seo-preview-title">{previewTitle || 'Post title preview'}</div>
+                <div className="seo-preview-url">{previewUrl}</div>
+                <div className="seo-preview-desc">{previewDesc || 'Search engines will show a short snippet from your post or SEO description.'}</div>
+              </div>
+              <p className="seo-hint">Tip: 50–60 characters for title, 140–160 for description.</p>
             </div>
 
             <div className="setting-group">
