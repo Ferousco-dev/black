@@ -8,15 +8,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const FROM_EMAIL = "noreply@yourdomain.com";
+const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
+const FROM_EMAIL = Deno.env.get("SENDGRID_FROM") || "feranmioresajo@gmail.com";
 const APP_NAME = "Chronicles";
 const APP_URL = Deno.env.get("APP_URL") || "https://yourapp.com";
+const BROADCAST_TYPES = new Set(["admin_broadcast", "admin_warning", "admin_update"]);
 
 serve(async (req) => {
   const { record } = await req.json();
 
-  if (!record || record.type !== "new_post") {
+  if (!record || !BROADCAST_TYPES.has(record.type)) {
     return new Response("skipped", { status: 200 });
   }
 
@@ -39,29 +40,54 @@ serve(async (req) => {
 
   if (!email || !profile) return new Response("no email", { status: 200 });
 
-  // Send email via Resend
-  const res = await fetch("https://api.resend.com/emails", {
+  if (!SENDGRID_API_KEY) {
+    return new Response("missing sendgrid key", { status: 200 });
+  }
+
+  const link = record.link
+    ? record.link.startsWith("http")
+      ? record.link
+      : `${APP_URL}${record.link}`
+    : null;
+
+  const subjectPrefix = record.type === "admin_warning" ? "[Warning]" : record.type === "admin_update" ? "[Update]" : "[Announcement]";
+  const subject = `${subjectPrefix} ${record.title}`;
+
+  // Send email via SendGrid
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
+      Authorization: `Bearer ${SENDGRID_API_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: `${APP_NAME} <${FROM_EMAIL}>`,
-      to: email,
-      subject: record.title,
-      html: `
-        <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-          <h2 style="color: #0a1628;">${record.title}</h2>
-          ${record.body ? `<p style="color: #4a5568;">${record.body}</p>` : ""}
-          ${record.link ? `<a href="${APP_URL}${record.link}" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#0a1628;color:white;border-radius:6px;text-decoration:none;">Read now</a>` : ""}
-          <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
-          <p style="font-size: 12px; color: #999;">
-            You're receiving this because you subscribed on ${APP_NAME}.
-            <a href="${APP_URL}/settings" style="color: #999;">Manage preferences</a>
-          </p>
-        </div>
-      `,
+      personalizations: [{ to: [{ email }] }],
+      from: { email: FROM_EMAIL, name: APP_NAME },
+      subject,
+      content: [
+        {
+          type: "text/plain",
+          value: `${record.title}\n\n${record.body || ""}${link ? `\n\nRead more: ${link}` : ""}\n\nManage preferences: ${APP_URL}/settings`,
+        },
+        {
+          type: "text/html",
+          value: `
+            <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+              <p style="font-size:12px; text-transform:uppercase; letter-spacing:0.12em; color:#94a3b8; margin:0 0 10px;">
+                ${subjectPrefix.replace("[", "").replace("]", "")}
+              </p>
+              <h2 style="color: #0a1628; margin: 0 0 12px;">${record.title}</h2>
+              ${record.body ? `<p style="color: #4a5568; line-height: 1.6;">${record.body}</p>` : ""}
+              ${link ? `<a href="${link}" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#0a1628;color:white;border-radius:6px;text-decoration:none;">View details</a>` : ""}
+              <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
+              <p style="font-size: 12px; color: #999;">
+                You're receiving this because you subscribed on ${APP_NAME}.
+                <a href="${APP_URL}/settings" style="color: #999;">Manage preferences</a>
+              </p>
+            </div>
+          `,
+        },
+      ],
     }),
   });
 
