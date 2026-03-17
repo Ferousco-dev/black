@@ -29,7 +29,11 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS social_links             JSONB DEFAULT '{}',    -- {twitter, instagram, youtube, ...}
   ADD COLUMN IF NOT EXISTS newsletter_header_html   TEXT,
   ADD COLUMN IF NOT EXISTS newsletter_footer_html   TEXT,
-  ADD COLUMN IF NOT EXISTS welcome_email_html       TEXT;
+  ADD COLUMN IF NOT EXISTS welcome_email_html       TEXT,
+  ADD COLUMN IF NOT EXISTS is_admin                 BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS is_suspended             BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS suspended_at             TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS suspended_reason         TEXT;
 
 -- Posts: SEO, audience gating, audio, scheduling, version tracking
 ALTER TABLE public.posts
@@ -414,6 +418,17 @@ CREATE TRIGGER update_paid_subscriptions_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 -- ============================================================
+-- 14b. ADMIN HELPERS
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS(
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND is_admin = TRUE
+  );
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- ============================================================
 -- 15. RLS FOR NEW TABLES
 -- ============================================================
 ALTER TABLE public.paid_subscriptions  ENABLE ROW LEVEL SECURITY;
@@ -441,6 +456,19 @@ ALTER TABLE public.featured_writers    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audio_tracks        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gift_subscriptions  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reading_history     ENABLE ROW LEVEL SECURITY;
+
+-- ADMIN RLS
+DROP POLICY IF EXISTS "Admins can update profiles" ON public.profiles;
+CREATE POLICY "Admins can update profiles" ON public.profiles FOR UPDATE USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admins can view all posts" ON public.posts;
+CREATE POLICY "Admins can view all posts" ON public.posts FOR SELECT USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admins can view all comments" ON public.comments;
+CREATE POLICY "Admins can view all comments" ON public.comments FOR SELECT USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admins can view reading history" ON public.reading_history;
+CREATE POLICY "Admins can view reading history" ON public.reading_history FOR SELECT USING (public.is_admin());
 
 -- PAID SUBSCRIPTIONS
 CREATE POLICY "Users see own paid subscriptions"   ON public.paid_subscriptions FOR SELECT USING (auth.uid() = subscriber_id OR auth.uid() = publisher_id);

@@ -283,6 +283,15 @@ export default function Navbar() {
                     >
                       Notifications
                     </Link>
+                    {profile?.is_admin && (
+                      <Link
+                        to="/admin"
+                        className="dropdown-item"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
                     <div className="dropdown-divider" />
                     <Link
                       to="/settings"
@@ -549,6 +558,21 @@ export default function Navbar() {
                   </svg>
                   <span>Bookmarks</span>
                 </Link>
+                {profile?.is_admin && (
+                  <Link to="/admin" className="mobile-link-item">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M12 3l7 4v5c0 5-3.5 9.5-7 9.5S5 17 5 12V7l7-4z" />
+                    </svg>
+                    <span>Admin Panel</span>
+                  </Link>
+                )}
               </div>
 
               <div className="mobile-divider" />

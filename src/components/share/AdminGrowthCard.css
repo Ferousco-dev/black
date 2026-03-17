@@ -1,0 +1,73 @@
+.admin-growth-card {
+  width: 1000px;
+  height: 560px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(10,22,40,0.12), rgba(10,22,40,0.04));
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--text-primary);
+}
+
+.admin-growth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.admin-growth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.admin-growth-title {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.85rem;
+}
+
+.admin-growth-main {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.admin-growth-stat {
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid var(--border-light);
+}
+
+.admin-growth-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.admin-growth-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.admin-growth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.admin-growth-watermark {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  font-weight: 700;
+}

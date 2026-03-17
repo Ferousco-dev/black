@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { signOut } from "./lib/api";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
@@ -23,6 +25,7 @@ import Community from "./pages/Community";
 import Topics from "./pages/Topics";
 import TopicHub from "./pages/TopicHub";
 import ForYou from "./pages/ForYou";
+import Admin from "./pages/Admin";
 import "./styles/global.css";
 
 function ProtectedRoute({ children }) {
@@ -37,6 +40,28 @@ function ProtectedRoute({ children }) {
 }
 
 function AppLayout() {
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSuspendSignOut = async () => {
+    await signOut();
+    navigate("/signin");
+  };
+
+  if (profile?.is_suspended) {
+    return (
+      <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+        <div className="card" style={{ padding: "2rem", maxWidth: 520, textAlign: "center" }}>
+          <h1 style={{ fontFamily: "var(--font-serif)", marginBottom: "0.75rem" }}>Account suspended</h1>
+          <p style={{ color: "var(--text-muted)", marginBottom: "1.5rem" }}>
+            Your account is currently suspended. If you believe this is a mistake, contact support.
+          </p>
+          <button className="btn btn-secondary" onClick={handleSuspendSignOut}>Sign out</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -131,6 +156,14 @@ function AppLayout() {
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
               </ProtectedRoute>
             }
           />

@@ -290,6 +290,73 @@ export const getForYouFeed = async (userId, page = 1, limit = 15) => {
   return { data: items.slice(start, end), error: null };
 };
 
+// ============================================================
+// ADMIN
+// ============================================================
+export const getAdminStats = async () => {
+  const [usersRes, postsRes, commentsRes, activeRes] = await Promise.all([
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("posts").select("*", { count: "exact", head: true }),
+    supabase.from("comments").select("*", { count: "exact", head: true }),
+    supabase
+      .from("reading_history")
+      .select("user_id, last_read_at")
+      .gte("last_read_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+  ]);
+
+  const activeUserSet = new Set((activeRes.data || []).map((row) => row.user_id));
+  return {
+    data: {
+      totalUsers: usersRes.count || 0,
+      totalPosts: postsRes.count || 0,
+      totalComments: commentsRes.count || 0,
+      activeUsers: activeUserSet.size,
+    },
+    error: usersRes.error || postsRes.error || commentsRes.error || activeRes.error,
+  };
+};
+
+export const getAdminUsers = async (limit = 50) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, username, full_name, avatar_url, created_at, is_admin, is_suspended, suspended_at")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const getAdminPosts = async (limit = 50) => {
+  const { data, error } = await supabase
+    .from("posts_with_stats")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const getAdminComments = async (limit = 50) => {
+  const { data, error } = await supabase
+    .from("comments")
+    .select("id, content, created_at, author:profiles(username, full_name), post:posts(title, slug)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const setUserSuspended = async ({ userId, isSuspended, reason = null }) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({
+      is_suspended: isSuspended,
+      suspended_at: isSuspended ? new Date().toISOString() : null,
+      suspended_reason: isSuspended ? reason : null,
+    })
+    .eq("id", userId)
+    .select()
+    .single();
+  return { data, error };
+};
+
 export const getUserDraftPosts = async (userId) => {
   const { data, error } = await supabase
     .from("posts")
