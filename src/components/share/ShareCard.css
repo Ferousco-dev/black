@@ -120,12 +120,12 @@
 
 @media (max-width: 768px) {
   .share-card-preview {
-    --scale: 0.42;
+    --scale: 0.34;
   }
 }
 
 @media (max-width: 520px) {
   .share-card-preview {
-    --scale: 0.32;
+    --scale: 0.26;
   }
 }

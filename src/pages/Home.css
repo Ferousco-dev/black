@@ -80,3 +80,34 @@
   .home-layout { grid-template-columns: 1fr; }
   .home-sidebar { display: none; }
 }
+
+@media (max-width: 640px) {
+  .resume-shelf {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .resume-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .resume-header h2 {
+    font-size: 0.95rem;
+  }
+  .resume-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .resume-card {
+    padding: 10px;
+  }
+  .resume-card-title {
+    font-size: 0.9rem;
+  }
+  .resume-card-meta {
+    font-size: 0.7rem;
+  }
+  .resume-progress {
+    height: 4px;
+  }
+}

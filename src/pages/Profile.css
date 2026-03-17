@@ -422,6 +422,8 @@
   border-radius: 18px;
   box-shadow: var(--shadow-lg);
   padding: 24px;
+  max-height: 90vh;
+  overflow: auto;
 }
 .profile-share-header-row {
   display: flex;
@@ -453,10 +455,10 @@
   align-items: center;
   justify-content: center;
   overflow: visible;
-  min-height: 360px;
+  min-height: 260px;
 }
 .profile-share-frame .profile-share-card {
-  transform: scale(0.46);
+  transform: scale(0.36);
   transform-origin: center;
 }
 .profile-share-actions {
@@ -496,15 +498,16 @@
 
 @media (max-width: 900px) {
   .profile-share-body { grid-template-columns: 1fr; }
-  .profile-share-frame { min-height: 300px; }
-  .profile-share-frame .profile-share-card { transform: scale(0.4); }
+  .profile-share-frame { min-height: 220px; }
+  .profile-share-frame .profile-share-card { transform: scale(0.32); }
 }
 
 @media (max-width: 600px) {
+  .profile-share-modal { align-items: flex-start; padding: 16px; }
   .profile-share-panel { padding: 18px; }
   .profile-share-link-row { flex-direction: column; }
-  .profile-share-frame { min-height: 240px; }
-  .profile-share-frame .profile-share-card { transform: scale(0.32); }
+  .profile-share-frame { min-height: 180px; }
+  .profile-share-frame .profile-share-card { transform: scale(0.26); }
 }
 
 /* Responsive */

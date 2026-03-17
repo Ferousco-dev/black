@@ -96,6 +96,8 @@
   box-shadow: var(--shadow-lg);
   padding: 24px;
   animation: fadeIn 0.2s ease;
+  max-height: 90vh;
+  overflow: auto;
 }
 .share-panel-header {
   display: flex;
@@ -185,6 +187,8 @@
 }
 
 @media (max-width: 600px) {
+  .share-modal { align-items: flex-start; padding: 16px; }
   .share-panel { padding: 18px; }
   .share-link-row { flex-direction: column; }
+  .share-panel-body { gap: 16px; }
 }
