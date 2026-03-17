@@ -13,7 +13,7 @@
 .topic-count { font-size: 0.72rem; opacity: 0.7; }
 .featured-section { margin-bottom: 48px; }
 .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-.featured-writer-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 16px; background: white; border: 1px solid var(--border-light); border-radius: 12px; text-decoration: none; transition: all 0.15s; }
+.featured-writer-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 16px; background: var(--white); border: 1px solid var(--border-light); border-radius: 12px; text-decoration: none; transition: all 0.15s; }
 .featured-writer-card:hover { border-color: var(--navy); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 .featured-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
 .featured-name { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
@@ -22,8 +22,8 @@
 .trending-section { }
 .trending-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .filter-tabs { display: flex; gap: 4px; }
-.filter-tab { padding: 5px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: white; font-size: 0.8rem; font-weight: 500; cursor: pointer; color: var(--text-secondary); font-family: var(--font-sans); transition: all 0.15s; }
-.filter-tab.active { background: var(--navy); color: white; border-color: var(--navy); }
+.filter-tab { padding: 5px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: var(--white); font-size: 0.8rem; font-weight: 500; cursor: pointer; color: var(--text-secondary); font-family: var(--font-sans); transition: all 0.15s; }
+.filter-tab.active { background: var(--navy); color: var(--text-on-accent); border-color: var(--navy); }
 .post-list { display: flex; flex-direction: column; gap: 1px; }
 .post-row { display: flex; gap: 16px; align-items: flex-start; padding: 18px 0; border-bottom: 1px solid var(--border-light); text-decoration: none; transition: all 0.1s; }
 .post-row:hover .post-row-title { color: var(--navy); }
@@ -38,7 +38,7 @@
 .post-row-stats { display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted); }
 .audience-lock { font-weight: 600; color: #92400e; }
 .authors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-.author-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: white; border: 1px solid var(--border-light); border-radius: 10px; text-decoration: none; transition: border-color 0.15s; }
+.author-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--white); border: 1px solid var(--border-light); border-radius: 10px; text-decoration: none; transition: border-color 0.15s; }
 .author-card:hover { border-color: var(--navy); }
 .author-card-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .author-card-info { display: flex; flex-direction: column; gap: 2px; }

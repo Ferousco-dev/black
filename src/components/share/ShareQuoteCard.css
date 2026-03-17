@@ -1,0 +1,120 @@
+.share-quote-card {
+  --scale: 1;
+  width: calc(1200px * var(--scale));
+  height: calc(630px * var(--scale));
+  border-radius: calc(22px * var(--scale));
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+  background-size: cover;
+  background-position: center;
+}
+
+.share-quote-card-export { --scale: 1; }
+.share-quote-card-preview { --scale: 0.62; }
+
+.share-quote-animate {
+  animation: shareQuoteIn 0.22s ease-out;
+}
+
+.share-quote-glass {
+  position: absolute;
+  inset: calc(22px * var(--scale));
+  border-radius: calc(18px * var(--scale));
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  pointer-events: none;
+}
+
+.share-quote-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: calc(44px * var(--scale));
+}
+
+.share-quote-top {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--scale));
+  font-size: calc(16px * var(--scale));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.share-quote-dot {
+  font-size: calc(14px * var(--scale));
+}
+
+.share-quote-text {
+  font-size: calc(34px * var(--scale));
+  font-weight: 600;
+  line-height: 1.4;
+  font-family: var(--font-serif);
+  max-width: 90%;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.share-quote-footer {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6px * var(--scale));
+  font-size: calc(16px * var(--scale));
+}
+
+.share-quote-author {
+  font-weight: 700;
+}
+
+.share-quote-title {
+  font-size: calc(15px * var(--scale));
+}
+
+.share-quote-watermark {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--scale));
+  font-size: calc(13px * var(--scale));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: calc(8px * var(--scale));
+}
+
+.share-quote-wave {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(190px * var(--scale));
+  z-index: 1;
+  opacity: 0.75;
+}
+
+@keyframes shareQuoteIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+  .share-quote-card-preview {
+    --scale: 0.42;
+  }
+}
+
+@media (max-width: 520px) {
+  .share-quote-card-preview {
+    --scale: 0.32;
+  }
+}

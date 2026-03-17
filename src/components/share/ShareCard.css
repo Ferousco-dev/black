@@ -1,0 +1,131 @@
+.share-card {
+  --scale: 1;
+  width: calc(1200px * var(--scale));
+  height: calc(630px * var(--scale));
+  border-radius: calc(22px * var(--scale));
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.18);
+  background-size: cover;
+  background-position: center;
+}
+
+.share-card-export { --scale: 1; }
+.share-card-preview { --scale: 0.62; }
+
+.share-card-animate {
+  animation: shareCardIn 0.22s ease-out;
+}
+
+.share-card-glass {
+  position: absolute;
+  inset: calc(22px * var(--scale));
+  border-radius: calc(18px * var(--scale));
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  pointer-events: none;
+}
+
+.share-card-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: calc(44px * var(--scale));
+}
+
+.share-card-top {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--scale));
+  font-size: calc(16px * var(--scale));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.share-card-dot {
+  font-size: calc(14px * var(--scale));
+}
+
+.share-card-main {
+  margin-top: calc(18px * var(--scale));
+}
+
+.share-card-title {
+  font-size: calc(44px * var(--scale));
+  font-weight: 700;
+  line-height: 1.15;
+  font-family: var(--font-serif);
+  margin-bottom: calc(16px * var(--scale));
+}
+
+.share-card-excerpt {
+  font-size: calc(20px * var(--scale));
+  line-height: 1.5;
+  max-width: 88%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.share-card-footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: calc(6px * var(--scale));
+  align-items: center;
+  font-size: calc(16px * var(--scale));
+}
+
+.share-card-author {
+  font-weight: 600;
+}
+
+.share-card-meta {
+  font-size: calc(15px * var(--scale));
+}
+
+.share-card-watermark {
+  grid-column: span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--scale));
+  font-size: calc(13px * var(--scale));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.share-card-wave {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(190px * var(--scale));
+  z-index: 1;
+  opacity: 0.75;
+}
+
+@keyframes shareCardIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+  .share-card-preview {
+    --scale: 0.42;
+  }
+}
+
+@media (max-width: 520px) {
+  .share-card-preview {
+    --scale: 0.32;
+  }
+}

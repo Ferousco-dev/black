@@ -16,9 +16,9 @@
 .pdf-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pdf-label { font-size: 0.775rem; color: var(--text-muted); }
 .post-view-actions { display: flex; align-items: center; gap: 8px; padding: 1.5rem 0; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); margin-bottom: 1.5rem; }
-.action-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 100px; background: white; font-size: 0.875rem; color: var(--text-secondary); font-family: var(--font-sans); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.action-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 100px; background: var(--white); font-size: 0.875rem; color: var(--text-secondary); font-family: var(--font-sans); cursor: pointer; transition: all 0.15s; text-decoration: none; }
 .action-btn:hover { border-color: var(--navy); color: var(--navy); }
-.action-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+.action-btn.active { background: var(--navy); color: var(--text-on-accent); border-color: var(--navy); }
 .post-view-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2.5rem; }
 .author-card { padding: 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 3rem; }
 .author-card-link { display: flex; align-items: center; gap: 14px; flex: 1; }
@@ -27,4 +27,121 @@
 @media (max-width: 600px) {
   .post-view-title { font-size: 1.8rem; }
   .post-view-author { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+
+/* Share modal */
+.share-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.share-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 18, 0.5);
+  backdrop-filter: blur(6px);
+}
+.share-panel {
+  position: relative;
+  z-index: 2;
+  width: min(980px, 95vw);
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+.share-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.share-panel-header h3 {
+  font-size: 1.25rem;
+  font-family: var(--font-serif);
+  margin-bottom: 4px;
+}
+.share-panel-header p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.share-close {
+  background: var(--off-white);
+  border: 1px solid var(--border-light);
+}
+.share-panel-body {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+}
+.share-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.share-preview-frame {
+  background: var(--off-white);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.share-preview-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+.share-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.share-link-row {
+  display: flex;
+  gap: 8px;
+}
+.share-link-row .form-input {
+  flex: 1;
+  background: var(--off-white);
+}
+.share-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.share-status {
+  font-size: 0.85rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  background: var(--off-white);
+  color: var(--text-secondary);
+}
+.share-status.loading { color: var(--text-secondary); }
+.share-status.success { color: var(--success); border-color: rgba(70, 194, 124, 0.3); }
+.share-status.error { color: var(--danger); border-color: rgba(224, 92, 79, 0.3); }
+.share-export-layer {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+}
+
+@media (max-width: 900px) {
+  .share-panel-body { grid-template-columns: 1fr; }
+  .share-preview-actions { justify-content: flex-start; }
+}
+
+@media (max-width: 600px) {
+  .share-panel { padding: 18px; }
+  .share-link-row { flex-direction: column; }
 }

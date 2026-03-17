@@ -1,9 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
-import { getPost, likePost, unlikePost, checkPostLiked, bookmarkPost, unbookmarkPost, checkBookmarked, checkSubscribed, subscribeToUser, unsubscribeFromUser } from '../lib/api';
+import { format, formatDistanceToNow } from 'date-fns';
+import { getPost, likePost, unlikePost, checkPostLiked, bookmarkPost, unbookmarkPost, checkBookmarked, checkSubscribed, subscribeToUser, unsubscribeFromUser, upsertReadingHistory } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import Comments from '../components/posts/Comments';
+import Highlights from '../components/posts/Highlights';
+import ShareCard from '../components/share/ShareCard';
+import ShareQuoteCard from '../components/share/ShareQuoteCard';
+import { randomGradient } from '../utils/randomGradient';
 import toast from 'react-hot-toast';
 import './PostView.css';
 
@@ -17,6 +21,14 @@ export default function PostView() {
   const [likeCount, setLikeCount] = useState(0);
   const [bookmarked, setBookmarked] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareStatus, setShareStatus] = useState({ state: 'idle', message: '' });
+  const [shareGradient, setShareGradient] = useState(() => randomGradient());
+  const [shareMode, setShareMode] = useState('post');
+  const [quoteText, setQuoteText] = useState('');
+  const shareExportRef = useRef(null);
+  const contentRef = useRef(null);
+  const lastProgressRef = useRef({ value: 0, at: 0 });
 
   useEffect(() => {
     loadPost();
@@ -28,6 +40,49 @@ export default function PostView() {
       checkBookmarked(user.id, post.id).then(({ bookmarked }) => setBookmarked(bookmarked));
       checkSubscribed(user.id, post.author_id).then(({ subscribed }) => setSubscribed(subscribed));
     }
+  }, [post, user]);
+
+  useEffect(() => {
+    if (!post) return;
+    const description = getShareExcerpt(post);
+    const ogImage = post.cover_image_url || `${window.location.origin}/android-chrome-512x512.png`;
+    const url = window.location.href;
+    document.title = `${post.title} — Chronicles`;
+    upsertMeta('name', 'description', description);
+    upsertMeta('property', 'og:type', 'article');
+    upsertMeta('property', 'og:title', post.title);
+    upsertMeta('property', 'og:description', description);
+    upsertMeta('property', 'og:image', ogImage);
+    upsertMeta('property', 'og:url', url);
+    upsertMeta('name', 'twitter:card', 'summary_large_image');
+    upsertMeta('name', 'twitter:title', post.title);
+    upsertMeta('name', 'twitter:description', description);
+    upsertMeta('name', 'twitter:image', ogImage);
+  }, [post]);
+
+  useEffect(() => {
+    if (!shareOpen) return undefined;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [shareOpen]);
+
+  useEffect(() => {
+    if (!post || !user) return undefined;
+    const updateProgress = () => {
+      if (!contentRef.current) return;
+      const rect = contentRef.current.getBoundingClientRect();
+      const contentTop = rect.top + window.scrollY;
+      const contentHeight = contentRef.current.offsetHeight;
+      const progress = Math.min(1, Math.max(0, (window.scrollY + window.innerHeight - contentTop) / contentHeight));
+      const now = Date.now();
+      if (now - lastProgressRef.current.at < 5000 && progress < 0.98) return;
+      if (Math.abs(progress - lastProgressRef.current.value) < 0.05 && progress < 0.98) return;
+      lastProgressRef.current = { value: progress, at: now };
+      upsertReadingHistory({ userId: user.id, postId: post.id, progress: Math.round(progress * 100) });
+    };
+    updateProgress();
+    window.addEventListener('scroll', updateProgress);
+    return () => window.removeEventListener('scroll', updateProgress);
   }, [post, user]);
 
   const loadPost = async () => {
@@ -75,6 +130,108 @@ export default function PostView() {
     }
   };
 
+  const handleOpenShare = () => {
+    setShareMode('post');
+    setShareGradient(randomGradient());
+    setShareStatus({ state: 'idle', message: '' });
+    setShareOpen(true);
+  };
+
+  const handleShareQuote = (quote) => {
+    setQuoteText(quote);
+    setShareMode('quote');
+    setShareGradient(randomGradient());
+    setShareStatus({ state: 'idle', message: '' });
+    setShareOpen(true);
+  };
+
+  const handleCopyLink = async () => {
+    if (!navigator.clipboard) {
+      setShareStatus({ state: 'error', message: 'Clipboard access not available.' });
+      toast.error('Clipboard access not available');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShareStatus({ state: 'success', message: 'Link copied to clipboard.' });
+      toast.success('Link copied');
+    } catch (err) {
+      setShareStatus({ state: 'error', message: 'Unable to copy link.' });
+      toast.error('Unable to copy link');
+    }
+  };
+
+  const renderShareImage = async () => {
+    if (!shareExportRef.current) return null;
+    setShareStatus({ state: 'loading', message: 'Generating share card…' });
+    try {
+      // Lazy-load to keep the share feature fast on initial page load.
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(shareExportRef.current, {
+        scale: 2,
+        backgroundColor: null,
+        useCORS: true,
+      });
+      return canvas;
+    } catch (err) {
+      setShareStatus({ state: 'error', message: 'Failed to generate image.' });
+      return null;
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    const canvas = await renderShareImage();
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = `${post.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-share.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    setShareStatus({ state: 'success', message: 'PNG downloaded.' });
+  };
+
+  const handleCopyImage = async () => {
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      setShareStatus({ state: 'error', message: 'Clipboard image not supported.' });
+      toast.error('Clipboard image not supported');
+      return;
+    }
+    const canvas = await renderShareImage();
+    if (!canvas) return;
+    try {
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) {
+        setShareStatus({ state: 'error', message: 'Unable to copy image.' });
+        return;
+      }
+      await navigator.clipboard.write([new window.ClipboardItem({ 'image/png': blob })]);
+      setShareStatus({ state: 'success', message: 'Image copied to clipboard.' });
+    } catch (err) {
+      setShareStatus({ state: 'error', message: 'Unable to copy image.' });
+    }
+  };
+
+  const handleWebShare = async () => {
+    if (!navigator.share) {
+      toast.error('Web Share is not supported on this device.');
+      return;
+    }
+    try {
+      setShareStatus({ state: 'loading', message: 'Opening share sheet…' });
+      await navigator.share({
+        title: shareMode === 'quote' ? `Quote from ${post.title}` : post.title,
+        text: shareMode === 'quote' ? `“${quoteText}”` : getShareExcerpt(post),
+        url: window.location.href,
+      });
+      setShareStatus({ state: 'success', message: 'Share sheet opened.' });
+    } catch (err) {
+      if (err?.name !== 'AbortError') {
+        setShareStatus({ state: 'error', message: 'Unable to share this post.' });
+      } else {
+        setShareStatus({ state: 'idle', message: '' });
+      }
+    }
+  };
+
   if (loading) return <div className="loading-page"><span className="spinner" style={{ width: 32, height: 32 }} /></div>;
 
   const initials = post.author_full_name
@@ -82,6 +239,11 @@ export default function PostView() {
     : post.author_username?.[0]?.toUpperCase() || '?';
 
   const timeAgo = post.published_at ? formatDistanceToNow(new Date(post.published_at), { addSuffix: true }) : '';
+  const shareMeta = buildShareMeta(post);
+  const shareExcerpt = getShareExcerpt(post);
+  const shareAuthor = post.author_full_name || post.author_username || 'Chronicles';
+  const shareHeading = shareMode === 'quote' ? 'Share this quote' : 'Share this post';
+  const shareSub = shareMode === 'quote' ? 'Turn a highlight into a share card.' : 'Generate a shareable link and visual preview.';
 
   return (
     <div className="post-view-page">
@@ -122,7 +284,9 @@ export default function PostView() {
         )}
 
         {/* Content */}
-        <div className="prose post-view-content" dangerouslySetInnerHTML={{ __html: post.content_html || post.content }} />
+        <div ref={contentRef} className="prose post-view-content" dangerouslySetInnerHTML={{ __html: post.content_html || post.content }} />
+
+        <Highlights postId={post.id} containerRef={contentRef} onShareQuote={handleShareQuote} />
 
         {/* PDF attachment */}
         {post.pdf_url && (
@@ -153,7 +317,7 @@ export default function PostView() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
             <span>{bookmarked ? 'Saved' : 'Save'}</span>
           </button>
-          <button className="action-btn" onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied'); }}>
+          <button className="action-btn" onClick={handleOpenShare}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             <span>Share</span>
           </button>
@@ -193,6 +357,135 @@ export default function PostView() {
 
         <Comments postId={post.id} />
       </div>
+
+      {shareOpen && (
+        <div className="share-modal" role="dialog" aria-modal="true">
+          <div className="share-backdrop" onClick={() => setShareOpen(false)} />
+          <div className="share-panel">
+            <div className="share-panel-header">
+              <div>
+                <h3>{shareHeading}</h3>
+                <p>{shareSub}</p>
+              </div>
+              <button className="icon-btn share-close" onClick={() => setShareOpen(false)} aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div className="share-panel-body">
+              <div className="share-preview">
+                <div className="share-preview-frame">
+                  {shareMode === 'quote' ? (
+                    <ShareQuoteCard
+                      quote={quoteText}
+                      title={post.title}
+                      author={shareAuthor}
+                      gradient={shareGradient}
+                      size="preview"
+                    />
+                  ) : (
+                    <ShareCard
+                      title={post.title}
+                      excerpt={shareExcerpt}
+                      author={shareAuthor}
+                      meta={shareMeta}
+                      gradient={shareGradient}
+                      size="preview"
+                    />
+                  )}
+                </div>
+                <div className="share-preview-actions">
+                  <button className="btn btn-secondary btn-sm" onClick={() => setShareGradient(randomGradient())}>
+                    Shuffle background
+                  </button>
+                </div>
+              </div>
+
+              <div className="share-actions">
+                <div className="share-link-row">
+                  <input className="form-input" value={window.location.href} readOnly />
+                  <button className="btn btn-secondary btn-sm" onClick={handleCopyLink}>Copy link</button>
+                </div>
+                <div className="share-button-row">
+                  <button className="btn btn-primary btn-sm" onClick={handleDownloadImage} disabled={shareStatus.state === 'loading'}>
+                    Download PNG
+                  </button>
+                  <button className="btn btn-secondary btn-sm" onClick={handleCopyImage} disabled={shareStatus.state === 'loading'}>
+                    Copy image
+                  </button>
+                  <button className="btn btn-ghost btn-sm" onClick={handleWebShare} disabled={shareStatus.state === 'loading'}>
+                    Share…
+                  </button>
+                </div>
+                {shareStatus.state !== 'idle' && (
+                  <div className={`share-status ${shareStatus.state}`}>
+                    {shareStatus.message}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="share-export-layer" aria-hidden="true">
+            {shareMode === 'quote' ? (
+              <ShareQuoteCard
+                ref={shareExportRef}
+                quote={quoteText}
+                title={post.title}
+                author={shareAuthor}
+                gradient={shareGradient}
+                size="export"
+                animate={false}
+              />
+            ) : (
+              <ShareCard
+                ref={shareExportRef}
+                title={post.title}
+                excerpt={shareExcerpt}
+                author={shareAuthor}
+                meta={shareMeta}
+                gradient={shareGradient}
+                size="export"
+                animate={false}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+const upsertMeta = (attr, key, content) => {
+  const selector = `meta[${attr}="${key}"]`;
+  let tag = document.querySelector(selector);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute(attr, key);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+};
+
+const stripHtml = (value = '') => value.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+
+const getShareExcerpt = (post) => {
+  if (!post) return '';
+  if (post.subtitle) return post.subtitle;
+  const plain = stripHtml(post.content_html || post.content || '');
+  return plain.length > 180 ? `${plain.slice(0, 177)}…` : plain;
+};
+
+const getReadTime = (content) => {
+  const words = content.split(/\s+/).filter(Boolean).length;
+  if (!words) return '';
+  return `${Math.max(1, Math.ceil(words / 220))} min read`;
+};
+
+const buildShareMeta = (post) => {
+  if (!post) return '';
+  const published = post.published_at ? format(new Date(post.published_at), 'MMM d, yyyy') : '';
+  const plain = stripHtml(post.content_html || post.content || '');
+  const readTime = getReadTime(plain);
+  return [published, readTime].filter(Boolean).join(' · ');
+};

@@ -4,14 +4,14 @@
 .analytics-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
 .range-tabs { display: flex; gap: 4px; background: var(--off-white); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
 .range-tab { padding: 5px 14px; border: none; background: none; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: var(--text-secondary); font-family: var(--font-sans); transition: all 0.15s; }
-.range-tab.active { background: white; color: var(--navy); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.range-tab.active { background: var(--white); color: var(--navy); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-bottom: 28px; }
-.kpi-card { background: white; border: 1px solid var(--border-light); border-radius: 12px; padding: 20px 18px; display: flex; flex-direction: column; gap: 6px; }
+.kpi-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 12px; padding: 20px 18px; display: flex; flex-direction: column; gap: 6px; }
 .kpi-card.kpi-paid { border-color: #c7d2fe; background: #eef2ff; }
 .kpi-card.kpi-revenue { border-color: #bbf7d0; background: #f0fdf4; }
 .kpi-label { font-size: 0.73rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
 .kpi-value { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); font-family: var(--font-serif); }
-.chart-card, .posts-table-card { background: white; border: 1px solid var(--border-light); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+.chart-card, .posts-table-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
 .chart-title { font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
 .chart-empty { color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 32px 0; }
 .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 140px; }

@@ -1,6 +1,6 @@
-.highlight-popover { position: absolute; z-index: 200; background: #1a1a2e; color: white; border-radius: 8px; padding: 4px 6px; display: flex; align-items: center; gap: 4px; transform: translateX(-50%); box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: fadeUp 0.15s ease; }
+.highlight-popover { position: absolute; z-index: 200; background: var(--inverse-bg); color: var(--text-on-dark); border-radius: 8px; padding: 6px 8px; display: flex; align-items: center; gap: 6px; transform: translateX(-50%); box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: fadeUp 0.15s ease; }
 @keyframes fadeUp { from { opacity:0; transform: translateX(-50%) translateY(6px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
-.highlight-pop-btn { background: none; border: none; color: white; font-size: 0.82rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; white-space: nowrap; font-family: var(--font-sans); }
+.highlight-pop-btn { background: none; border: none; color: var(--text-on-dark); font-size: 0.82rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; white-space: nowrap; font-family: var(--font-sans); }
 .highlight-pop-btn:hover { background: rgba(255,255,255,0.15); }
 .highlight-pop-close { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 1rem; cursor: pointer; padding: 0 4px; line-height: 1; }
 .highlights-list { margin-top: 40px; border-top: 1px solid var(--border-light); padding-top: 28px; }

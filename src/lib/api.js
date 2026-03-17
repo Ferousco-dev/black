@@ -264,6 +264,31 @@ export const updateComment = async (commentId, content) => {
   return { data, error };
 };
 
+// ============================================================
+// READING HISTORY
+// ============================================================
+export const upsertReadingHistory = async ({ userId, postId, progress = 0 }) => {
+  const { data, error } = await supabase
+    .from('reading_history')
+    .upsert(
+      { user_id: userId, post_id: postId, progress, last_read_at: new Date().toISOString() },
+      { onConflict: 'user_id,post_id' }
+    )
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const getResumeReading = async (userId, limit = 5) => {
+  const { data, error } = await supabase
+    .from('reading_history')
+    .select('progress, last_read_at, post:posts_with_stats(*)')
+    .eq('user_id', userId)
+    .order('last_read_at', { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
 export const deleteComment = async (commentId) => {
   const { error } = await supabase
     .from("comments")

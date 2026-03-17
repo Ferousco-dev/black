@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import './Highlights.css';
 
-export default function Highlights({ postId }) {
+export default function Highlights({ postId, containerRef, onShareQuote }) {
   const { user } = useAuth();
   const [highlights, setHighlights] = useState([]);
   const [showPopover, setShowPopover] = useState(false);
@@ -23,11 +23,21 @@ export default function Highlights({ postId }) {
     const text = sel?.toString().trim();
     if (!text || text.length < 10 || text.length > 500) { setShowPopover(false); return; }
     const range = sel.getRangeAt(0);
+    if (containerRef?.current && !containerRef.current.contains(range.commonAncestorContainer)) {
+      setShowPopover(false);
+      return;
+    }
     const rect = range.getBoundingClientRect();
     setSelectedText(text);
     setPopoverPos({ x: rect.left + rect.width / 2, y: rect.top + window.scrollY - 48 });
     setShowPopover(true);
-  }, []);
+  }, [containerRef]);
+
+  useEffect(() => {
+    const target = containerRef?.current || document;
+    target.addEventListener('mouseup', handleMouseUp);
+    return () => target.removeEventListener('mouseup', handleMouseUp);
+  }, [handleMouseUp, containerRef]);
 
   async function saveHighlight() {
     if (!user) { toast.error('Sign in to save highlights'); return; }
@@ -38,16 +48,21 @@ export default function Highlights({ postId }) {
     window.getSelection()?.removeAllRanges();
   }
 
+  const handleShare = () => {
+    if (onShareQuote) onShareQuote(selectedText);
+    setShowPopover(false);
+    window.getSelection()?.removeAllRanges();
+  };
+
   return (
     <>
-      <div onMouseUp={handleMouseUp}>
-        {showPopover && (
-          <div className="highlight-popover" style={{ left: popoverPos.x, top: popoverPos.y }}>
-            <button className="highlight-pop-btn" onClick={saveHighlight}>✏️ Highlight</button>
-            <button className="highlight-pop-close" onClick={() => setShowPopover(false)}>×</button>
-          </div>
-        )}
-      </div>
+      {showPopover && (
+        <div className="highlight-popover" style={{ left: popoverPos.x, top: popoverPos.y }}>
+          <button className="highlight-pop-btn" onClick={saveHighlight}>✏️ Highlight</button>
+          <button className="highlight-pop-btn" onClick={handleShare}>Share quote</button>
+          <button className="highlight-pop-close" onClick={() => setShowPopover(false)}>×</button>
+        </div>
+      )}
       {highlights.length > 0 && (
         <div className="highlights-list">
           <h4 className="highlights-title">Reader highlights</h4>
