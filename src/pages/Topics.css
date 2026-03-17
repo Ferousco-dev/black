@@ -1,0 +1,60 @@
+.topics-page { padding: 2.5rem 0 4rem; min-height: 80vh; }
+.topics-header { margin-bottom: 24px; }
+.topics-header h1 {
+  font-family: var(--font-serif);
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+.topics-header p {
+  color: var(--text-secondary);
+  max-width: 620px;
+}
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.topic-card {
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 18px;
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+.topic-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+}
+.topic-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.topic-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.topic-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.topic-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.topic-cta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}

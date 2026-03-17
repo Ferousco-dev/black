@@ -158,6 +158,59 @@ export const getPosts = async ({
   return { data, error, count };
 };
 
+// ============================================================
+// TOPICS & DISCOVERY
+// ============================================================
+export const getTopics = async (limit = 30) => {
+  const { data, error } = await supabase
+    .from('topics')
+    .select('*')
+    .order('post_count', { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const getTopicBySlug = async (slug) => {
+  const { data, error } = await supabase
+    .from('topics')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+  return { data, error };
+};
+
+export const getPostTopics = async (postId) => {
+  const { data, error } = await supabase
+    .from('post_topics')
+    .select('topic:topics(*)')
+    .eq('post_id', postId);
+  return { data, error };
+};
+
+export const getPostsByTopic = async (topicId, limit = 12) => {
+  const { data, error } = await supabase
+    .from('post_topics')
+    .select('post:posts_with_stats(*)')
+    .eq('topic_id', topicId)
+    .order('published_at', { foreignTable: 'post', ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const getPostsByTags = async (tags = [], excludePostId = null, limit = 6) => {
+  if (!tags.length) return { data: [], error: null };
+  let query = supabase
+    .from('posts_with_stats')
+    .select('*')
+    .eq('is_published', true)
+    .overlaps('tags', tags)
+    .order('published_at', { ascending: false })
+    .limit(limit);
+  if (excludePostId) query = query.neq('id', excludePostId);
+  const { data, error } = await query;
+  return { data, error };
+};
+
 export const getUserDraftPosts = async (userId) => {
   const { data, error } = await supabase
     .from("posts")

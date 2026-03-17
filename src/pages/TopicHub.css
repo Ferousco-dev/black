@@ -1,0 +1,123 @@
+.topic-hub-page { padding: 2.5rem 0 4rem; min-height: 80vh; }
+.topic-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.topic-hero h1 {
+  font-family: var(--font-serif);
+  font-size: 2.6rem;
+  margin: 8px 0;
+}
+.topic-hero p {
+  color: var(--text-secondary);
+  max-width: 620px;
+}
+.topic-hero-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.topic-hero-stats {
+  display: grid;
+  gap: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  padding: 16px;
+  border-radius: 16px;
+  min-width: 160px;
+}
+.topic-hero-stats strong {
+  font-size: 1.4rem;
+  color: var(--text-primary);
+}
+.topic-hero-stats span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.topic-layout {
+  display: grid;
+  grid-template-columns: 1.5fr 0.6fr;
+  gap: 28px;
+}
+.topic-section-header h2 {
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+.topic-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.topic-card h3 {
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+.topic-writers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.topic-writer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.topic-writer img,
+.topic-writer-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.topic-writer-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.topic-writer-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.topic-featured {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.topic-featured-item {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--off-white);
+  border: 1px solid var(--border-light);
+}
+.topic-featured-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.topic-featured-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.muted { color: var(--text-muted); font-size: 0.85rem; }
+
+@media (max-width: 900px) {
+  .topic-layout { grid-template-columns: 1fr; }
+  .topic-hero { flex-direction: column; }
+  .topic-hero-stats { width: 100%; }
+}

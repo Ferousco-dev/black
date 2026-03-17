@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { format, formatDistanceToNow } from 'date-fns';
-import { getPost, likePost, unlikePost, checkPostLiked, bookmarkPost, unbookmarkPost, checkBookmarked, checkSubscribed, subscribeToUser, unsubscribeFromUser, upsertReadingHistory } from '../lib/api';
+import { getPost, likePost, unlikePost, checkPostLiked, bookmarkPost, unbookmarkPost, checkBookmarked, checkSubscribed, subscribeToUser, unsubscribeFromUser, upsertReadingHistory, getPostTopics, getPostsByTopic, getPostsByTags } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import Comments from '../components/posts/Comments';
 import Highlights from '../components/posts/Highlights';
 import ShareCard from '../components/share/ShareCard';
 import ShareQuoteCard from '../components/share/ShareQuoteCard';
+import PostCard from '../components/posts/PostCard';
 import { randomGradient } from '../utils/randomGradient';
 import toast from 'react-hot-toast';
 import './PostView.css';
@@ -26,6 +27,8 @@ export default function PostView() {
   const [shareGradient, setShareGradient] = useState(() => randomGradient());
   const [shareMode, setShareMode] = useState('post');
   const [quoteText, setQuoteText] = useState('');
+  const [relatedPosts, setRelatedPosts] = useState([]);
+  const [postTopics, setPostTopics] = useState([]);
   const shareExportRef = useRef(null);
   const contentRef = useRef(null);
   const lastProgressRef = useRef({ value: 0, at: 0 });
@@ -84,6 +87,11 @@ export default function PostView() {
     window.addEventListener('scroll', updateProgress);
     return () => window.removeEventListener('scroll', updateProgress);
   }, [post, user]);
+
+  useEffect(() => {
+    if (!post) return;
+    loadRelated();
+  }, [post]);
 
   const loadPost = async () => {
     const { data, error } = await getPost(slug);
@@ -232,6 +240,24 @@ export default function PostView() {
     }
   };
 
+  const loadRelated = async () => {
+    const topicsRes = await getPostTopics(post.id);
+    const topics = (topicsRes.data || []).map((item) => item.topic).filter(Boolean);
+    setPostTopics(topics);
+
+    const byTags = await getPostsByTags(post.tags || [], post.id, 6);
+    const topicPosts = topics.length > 0 ? await getPostsByTopic(topics[0].id, 6) : { data: [] };
+
+    const merged = new Map();
+    (byTags.data || []).forEach((item) => merged.set(item.id, item));
+    (topicPosts.data || []).forEach((item) => {
+      if (item?.post?.id) merged.set(item.post.id, item.post);
+    });
+
+    const items = Array.from(merged.values()).filter((item) => item?.id && item.id !== post.id);
+    setRelatedPosts(items.slice(0, 4));
+  };
+
   if (loading) return <div className="loading-page"><span className="spinner" style={{ width: 32, height: 32 }} /></div>;
 
   const initials = post.author_full_name
@@ -356,6 +382,28 @@ export default function PostView() {
         </div>
 
         <Comments postId={post.id} />
+
+        {relatedPosts.length > 0 && (
+          <div className="related-posts">
+            <div className="related-header">
+              <h3>If you liked this…</h3>
+              {postTopics.length > 0 && (
+                <div className="related-topics">
+                  {postTopics.slice(0, 3).map((topic) => (
+                    <Link key={topic.id} to={`/topics/${topic.slug}`} className="related-topic">
+                      {topic.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="related-grid">
+              {relatedPosts.map((item) => (
+                <PostCard key={item.id} post={item} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {shareOpen && (

@@ -163,6 +163,19 @@ CREATE TABLE IF NOT EXISTS public.highlights (
 );
 
 -- ============================================================
+-- 4b. READING HISTORY (resume shelf)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.reading_history (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  post_id uuid REFERENCES public.posts(id) ON DELETE CASCADE NOT NULL,
+  progress numeric DEFAULT 0,
+  last_read_at timestamptz DEFAULT now(),
+  created_at timestamptz DEFAULT now(),
+  UNIQUE(user_id, post_id)
+);
+
+-- ============================================================
 -- 5. BOOKMARKS WITH FOLDERS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.bookmark_folders (
@@ -427,6 +440,7 @@ ALTER TABLE public.post_topics         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.featured_writers    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audio_tracks        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gift_subscriptions  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reading_history     ENABLE ROW LEVEL SECURITY;
 
 -- PAID SUBSCRIPTIONS
 CREATE POLICY "Users see own paid subscriptions"   ON public.paid_subscriptions FOR SELECT USING (auth.uid() = subscriber_id OR auth.uid() = publisher_id);
@@ -451,6 +465,9 @@ CREATE POLICY "Public highlights are viewable"    ON public.highlights FOR SELEC
 CREATE POLICY "Authenticated users can highlight" ON public.highlights FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own highlights"   ON public.highlights FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own highlights"   ON public.highlights FOR DELETE USING (auth.uid() = user_id);
+
+-- READING HISTORY
+CREATE POLICY "Users manage own reading history"  ON public.reading_history FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- BOOKMARK FOLDERS
 CREATE POLICY "Users see own bookmark folders"    ON public.bookmark_folders FOR SELECT USING (auth.uid() = user_id);
@@ -642,6 +659,7 @@ CREATE INDEX IF NOT EXISTS paid_subs_subscriber_idx ON public.paid_subscriptions
 CREATE INDEX IF NOT EXISTS tips_recipient_idx        ON public.tips(recipient_id);
 CREATE INDEX IF NOT EXISTS reactions_post_idx        ON public.post_reactions(post_id);
 CREATE INDEX IF NOT EXISTS highlights_post_idx       ON public.highlights(post_id, is_public);
+CREATE INDEX IF NOT EXISTS reading_history_user_last_idx ON public.reading_history(user_id, last_read_at DESC);
 CREATE INDEX IF NOT EXISTS analytics_post_date_idx   ON public.post_analytics(post_id, date DESC);
 CREATE INDEX IF NOT EXISTS chat_room_idx             ON public.chat_messages(room_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS questions_publisher_idx   ON public.questions(publisher_id, is_published);

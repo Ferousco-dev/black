@@ -94,6 +94,14 @@ export default function Navbar() {
           >
             Discover
           </Link>
+          <Link
+            to="/topics"
+            className={
+              "nav-link" + (location.pathname.startsWith("/topics") ? " active" : "")
+            }
+          >
+            Topics
+          </Link>
           {user && (
             <Link
               to="/feed"
@@ -364,6 +372,20 @@ export default function Navbar() {
                 <path d="m21 21-4.35-4.35" />
               </svg>
               <span>Discover</span>
+            </Link>
+            <Link to="/topics" className="mobile-link-item">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 3v18M3 12h18" />
+              </svg>
+              <span>Topics</span>
             </Link>
             {user && (
               <Link to="/feed" className="mobile-link-item">

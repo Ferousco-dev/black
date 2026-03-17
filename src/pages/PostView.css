@@ -24,6 +24,47 @@
 .author-card-link { display: flex; align-items: center; gap: 14px; flex: 1; }
 .author-card-name { font-weight: 600; font-size: 1rem; }
 .author-card-handle { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Related posts */
+.related-posts {
+  margin-top: 3rem;
+  border-top: 1px solid var(--border-light);
+  padding-top: 2rem;
+}
+.related-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.related-header h3 {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  color: var(--text-primary);
+}
+.related-topics {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.related-topic {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--off-white);
+  border: 1px solid var(--border-light);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.related-topic:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.related-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
 @media (max-width: 600px) {
   .post-view-title { font-size: 1.8rem; }
   .post-view-author { flex-direction: column; align-items: flex-start; gap: 12px; }

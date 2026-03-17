@@ -1,17 +1,25 @@
 import { useState, useEffect } from "react";
-import { getPosts } from "../lib/api";
+import { getPosts, getResumeReading } from "../lib/api";
+import { useAuth } from "../hooks/useAuth";
 import PostCard from "../components/posts/PostCard";
 import "./Home.css";
 
 export default function Home() {
+  const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [resumeItems, setResumeItems] = useState([]);
 
   useEffect(() => {
     loadPosts(1, true);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    loadResume();
+  }, [user]);
 
   const loadPosts = async (p, reset = false) => {
     setLoading(true);
@@ -28,6 +36,15 @@ export default function Home() {
     loadPosts(next);
   };
 
+  const loadResume = async () => {
+    const { data } = await getResumeReading(user.id, 5);
+    setResumeItems((data || []).map((item) => ({
+      ...item,
+      post: item.post,
+      progress: item.progress || 0,
+    })));
+  };
+
   return (
     <div className="home-page">
       <div className="container">
@@ -36,6 +53,30 @@ export default function Home() {
             <div className="home-header">
               <h1 className="home-title">Latest Posts</h1>
             </div>
+
+            {user && resumeItems.length > 0 && (
+              <section className="resume-shelf">
+                <div className="resume-header">
+                  <h2>Resume reading</h2>
+                  <span>Pick up where you left off</span>
+                </div>
+                <div className="resume-grid">
+                  {resumeItems.map((item) => (
+                    <a key={item.post?.id} href={`/p/${item.post?.slug}`} className="resume-card">
+                      <div className="resume-card-title">{item.post?.title}</div>
+                      <div className="resume-card-meta">
+                        <span>@{item.post?.author_username}</span>
+                        <span>·</span>
+                        <span>{item.progress}% read</span>
+                      </div>
+                      <div className="resume-progress">
+                        <span style={{ width: `${item.progress}%` }} />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {loading && posts.length === 0 ? (
               <div className="loading-page">
