@@ -38,6 +38,10 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
+.resume-card-single {
+  display: block;
+  width: 100%;
+}
 .resume-card {
   display: block;
   padding: 14px;

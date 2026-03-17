@@ -12,21 +12,32 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
+      if (session?.user) fetchProfile(session.user);
       else setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
+      if (session?.user) fetchProfile(session.user);
       else { setProfile(null); setLoading(false); }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId) => {
-    const { data } = await getProfile(userId);
+  const fetchProfile = async (sessionUser) => {
+    const { data } = await getProfile(sessionUser.id);
+    if (data?.force_logout_at && sessionUser?.last_sign_in_at) {
+      const forceAt = new Date(data.force_logout_at).getTime();
+      const signedInAt = new Date(sessionUser.last_sign_in_at).getTime();
+      if (forceAt > signedInAt) {
+        await supabase.auth.signOut();
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+    }
     setProfile(data);
     setLoading(false);
   };

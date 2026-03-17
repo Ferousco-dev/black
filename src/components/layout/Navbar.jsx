@@ -7,7 +7,7 @@ import {
   listenToSystemTheme,
   applyTheme,
 } from "../../theme";
-import { signOut } from "../../lib/api";
+import { signOut, getResumeReading } from "../../lib/api";
 import NotificationBell from "./NotificationBell";
 import toast from "react-hot-toast";
 import "./Navbar.css";
@@ -21,8 +21,11 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [theme, setTheme] = useState(getTheme());
+  const [resumeOpen, setResumeOpen] = useState(false);
+  const [resumeItems, setResumeItems] = useState([]);
   const menuRef = useRef(null);
   const searchRef = useRef(null);
+  const resumeRef = useRef(null);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -34,6 +37,8 @@ export default function Navbar() {
         setMenuOpen(false);
       if (searchRef.current && !searchRef.current.contains(e.target))
         setSearchOpen(false);
+      if (resumeRef.current && !resumeRef.current.contains(e.target))
+        setResumeOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -75,6 +80,16 @@ export default function Navbar() {
 
   const handleThemeToggle = () => {
     setTheme(toggleTheme());
+  };
+
+  const handleResumeOpen = async () => {
+    if (!user) return;
+    const next = !resumeOpen;
+    setResumeOpen(next);
+    if (next) {
+      const { data } = await getResumeReading(user.id, 5);
+      setResumeItems((data || []).map((item) => ({ ...item, post: item.post })));
+    }
   };
 
   return (
@@ -202,6 +217,49 @@ export default function Navbar() {
 
           {user ? (
             <>
+              {profile?.is_admin && (
+                <Link to="/admin" className="btn btn-secondary btn-sm">
+                  Admin
+                </Link>
+              )}
+              <div className="resume-dropdown-wrapper" ref={resumeRef}>
+                <button className="icon-btn" onClick={handleResumeOpen} aria-label="Resume reading">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4h16v16H4z" />
+                    <path d="M8 4v16M16 8v8" />
+                  </svg>
+                </button>
+                {resumeOpen && (
+                  <div className="resume-dropdown">
+                    <div className="resume-dropdown-header">
+                      <span>Resume reading</span>
+                      <Link to="/" className="resume-see-all" onClick={() => setResumeOpen(false)}>
+                        Home
+                      </Link>
+                    </div>
+                    {resumeItems.length === 0 ? (
+                      <div className="resume-empty">No recent reads</div>
+                    ) : (
+                      resumeItems.map((item) => (
+                        <Link
+                          key={item.post?.id}
+                          to={`/p/${item.post?.slug}`}
+                          className="resume-item"
+                          onClick={() => setResumeOpen(false)}
+                        >
+                          <div className="resume-item-title">{item.post?.title}</div>
+                          <div className="resume-item-meta">
+                            @{item.post?.author_username} · {item.progress || 0}% read
+                          </div>
+                          <div className="resume-item-bar">
+                            <span style={{ width: `${item.progress || 0}%` }} />
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
               <NotificationBell />
               <Link
                 to="/dashboard/new"

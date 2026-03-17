@@ -58,23 +58,19 @@ export default function Home() {
               <section className="resume-shelf">
                 <div className="resume-header">
                   <h2>Resume reading</h2>
-                  <span>Pick up where you left off</span>
+                  <span>Most recent</span>
                 </div>
-                <div className="resume-grid">
-                  {resumeItems.map((item) => (
-                    <a key={item.post?.id} href={`/p/${item.post?.slug}`} className="resume-card">
-                      <div className="resume-card-title">{item.post?.title}</div>
-                      <div className="resume-card-meta">
-                        <span>@{item.post?.author_username}</span>
-                        <span>·</span>
-                        <span>{item.progress}% read</span>
-                      </div>
-                      <div className="resume-progress">
-                        <span style={{ width: `${item.progress}%` }} />
-                      </div>
-                    </a>
-                  ))}
-                </div>
+                <a href={`/p/${resumeItems[0]?.post?.slug}`} className="resume-card resume-card-single">
+                  <div className="resume-card-title">{resumeItems[0]?.post?.title}</div>
+                  <div className="resume-card-meta">
+                    <span>@{resumeItems[0]?.post?.author_username}</span>
+                    <span>·</span>
+                    <span>{resumeItems[0]?.progress}% read</span>
+                  </div>
+                  <div className="resume-progress">
+                    <span style={{ width: `${resumeItems[0]?.progress}%` }} />
+                  </div>
+                </a>
               </section>
             )}
 

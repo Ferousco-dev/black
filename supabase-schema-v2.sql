@@ -33,7 +33,8 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS is_admin                 BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS is_suspended             BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS suspended_at             TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS suspended_reason         TEXT;
+  ADD COLUMN IF NOT EXISTS suspended_reason         TEXT,
+  ADD COLUMN IF NOT EXISTS force_logout_at          TIMESTAMPTZ;
 
 -- Posts: SEO, audience gating, audio, scheduling, version tracking
 ALTER TABLE public.posts
@@ -413,6 +414,7 @@ CREATE TABLE IF NOT EXISTS public.gift_subscriptions (
 -- ============================================================
 -- 14. UPDATED_AT TRIGGERS FOR NEW TABLES
 -- ============================================================
+DROP TRIGGER IF EXISTS update_paid_subscriptions_updated_at ON public.paid_subscriptions;
 CREATE TRIGGER update_paid_subscriptions_updated_at
   BEFORE UPDATE ON public.paid_subscriptions
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
@@ -427,6 +429,53 @@ RETURNS BOOLEAN AS $$
     WHERE id = auth.uid() AND is_admin = TRUE
   );
 $$ LANGUAGE sql SECURITY DEFINER;
+
+-- ============================================================
+-- 14c. ADMIN OPERATIONS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.admin_broadcasts (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  title TEXT NOT NULL,
+  body TEXT,
+  type TEXT NOT NULL CHECK (type IN ('announcement','warning','update')),
+  link TEXT,
+  created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  sent_count INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS public.security_events (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  ip_address TEXT,
+  user_agent TEXT,
+  event_type TEXT NOT NULL CHECK (event_type IN ('suspicious_login','rate_limit','ip_block','manual')),
+  severity TEXT NOT NULL DEFAULT 'medium' CHECK (severity IN ('low','medium','high')),
+  notes TEXT,
+  created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.banned_ips (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  ip_range TEXT NOT NULL,
+  reason TEXT,
+  active BOOLEAN DEFAULT TRUE,
+  created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  revoked_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  revoked_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS public.rate_limit_rules (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  scope TEXT NOT NULL,
+  max_requests INTEGER NOT NULL,
+  window_seconds INTEGER NOT NULL,
+  active BOOLEAN DEFAULT TRUE,
+  created_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
 -- ============================================================
 -- 15. RLS FOR NEW TABLES
@@ -456,6 +505,10 @@ ALTER TABLE public.featured_writers    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audio_tracks        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gift_subscriptions  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reading_history     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_broadcasts    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.security_events     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.banned_ips          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rate_limit_rules    ENABLE ROW LEVEL SECURITY;
 
 -- ADMIN RLS
 DROP POLICY IF EXISTS "Admins can update profiles" ON public.profiles;
@@ -470,91 +523,156 @@ CREATE POLICY "Admins can view all comments" ON public.comments FOR SELECT USING
 DROP POLICY IF EXISTS "Admins can view reading history" ON public.reading_history;
 CREATE POLICY "Admins can view reading history" ON public.reading_history FOR SELECT USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins manage broadcasts" ON public.admin_broadcasts;
+CREATE POLICY "Admins manage broadcasts" ON public.admin_broadcasts FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "Admins manage security events" ON public.security_events;
+CREATE POLICY "Admins manage security events" ON public.security_events FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "Admins manage banned ips" ON public.banned_ips;
+CREATE POLICY "Admins manage banned ips" ON public.banned_ips FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "Admins manage rate limits" ON public.rate_limit_rules;
+CREATE POLICY "Admins manage rate limits" ON public.rate_limit_rules FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
 -- PAID SUBSCRIPTIONS
+DROP POLICY IF EXISTS "Users see own paid subscriptions" ON public.paid_subscriptions;
 CREATE POLICY "Users see own paid subscriptions"   ON public.paid_subscriptions FOR SELECT USING (auth.uid() = subscriber_id OR auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "System inserts paid subscriptions" ON public.paid_subscriptions;
 CREATE POLICY "System inserts paid subscriptions"  ON public.paid_subscriptions FOR INSERT WITH CHECK (TRUE);
+DROP POLICY IF EXISTS "System updates paid subscriptions" ON public.paid_subscriptions;
 CREATE POLICY "System updates paid subscriptions"  ON public.paid_subscriptions FOR UPDATE USING (TRUE);
 
 -- TIPS
+DROP POLICY IF EXISTS "Tips visible to sender and recipient" ON public.tips;
 CREATE POLICY "Tips visible to sender and recipient" ON public.tips FOR SELECT USING (auth.uid() = sender_id OR auth.uid() = recipient_id);
+DROP POLICY IF EXISTS "Authenticated users can tip" ON public.tips;
 CREATE POLICY "Authenticated users can tip"          ON public.tips FOR INSERT WITH CHECK (auth.uid() = sender_id);
 
 -- POST PURCHASES
+DROP POLICY IF EXISTS "Buyers see own purchases" ON public.post_purchases;
 CREATE POLICY "Buyers see own purchases"    ON public.post_purchases FOR SELECT USING (auth.uid() = buyer_id);
+DROP POLICY IF EXISTS "Authenticated users can buy" ON public.post_purchases;
 CREATE POLICY "Authenticated users can buy" ON public.post_purchases FOR INSERT WITH CHECK (auth.uid() = buyer_id);
 
 -- REACTIONS
+DROP POLICY IF EXISTS "Reactions are public" ON public.post_reactions;
 CREATE POLICY "Reactions are public"              ON public.post_reactions FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Authenticated users can react" ON public.post_reactions;
 CREATE POLICY "Authenticated users can react"     ON public.post_reactions FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can remove own reactions" ON public.post_reactions;
 CREATE POLICY "Users can remove own reactions"    ON public.post_reactions FOR DELETE USING (auth.uid() = user_id);
 
 -- HIGHLIGHTS
+DROP POLICY IF EXISTS "Public highlights are viewable" ON public.highlights;
 CREATE POLICY "Public highlights are viewable"    ON public.highlights FOR SELECT USING (is_public = TRUE OR auth.uid() = user_id);
+DROP POLICY IF EXISTS "Authenticated users can highlight" ON public.highlights;
 CREATE POLICY "Authenticated users can highlight" ON public.highlights FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can update own highlights" ON public.highlights;
 CREATE POLICY "Users can update own highlights"   ON public.highlights FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can delete own highlights" ON public.highlights;
 CREATE POLICY "Users can delete own highlights"   ON public.highlights FOR DELETE USING (auth.uid() = user_id);
 
 -- READING HISTORY
+DROP POLICY IF EXISTS "Users manage own reading history" ON public.reading_history;
 CREATE POLICY "Users manage own reading history"  ON public.reading_history FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- BOOKMARK FOLDERS
+DROP POLICY IF EXISTS "Users see own bookmark folders" ON public.bookmark_folders;
 CREATE POLICY "Users see own bookmark folders"    ON public.bookmark_folders FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can create bookmark folders" ON public.bookmark_folders;
 CREATE POLICY "Users can create bookmark folders" ON public.bookmark_folders FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can update own folders" ON public.bookmark_folders;
 CREATE POLICY "Users can update own folders"      ON public.bookmark_folders FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can delete own folders" ON public.bookmark_folders;
 CREATE POLICY "Users can delete own folders"      ON public.bookmark_folders FOR DELETE USING (auth.uid() = user_id);
 
 -- ANALYTICS (publisher only)
+DROP POLICY IF EXISTS "Publishers see own analytics" ON public.post_analytics;
 CREATE POLICY "Publishers see own analytics"   ON public.post_analytics     FOR SELECT USING (EXISTS(SELECT 1 FROM public.posts WHERE id = post_id AND author_id = auth.uid()));
+DROP POLICY IF EXISTS "System inserts analytics" ON public.post_analytics;
 CREATE POLICY "System inserts analytics"       ON public.post_analytics     FOR INSERT WITH CHECK (TRUE);
+DROP POLICY IF EXISTS "System updates analytics" ON public.post_analytics;
 CREATE POLICY "System updates analytics"       ON public.post_analytics     FOR UPDATE USING (TRUE);
+DROP POLICY IF EXISTS "Publishers see revenue" ON public.revenue_snapshots;
 CREATE POLICY "Publishers see revenue"         ON public.revenue_snapshots  FOR SELECT USING (auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "Publishers see subscriber events" ON public.subscriber_events;
 CREATE POLICY "Publishers see subscriber events" ON public.subscriber_events FOR SELECT USING (auth.uid() = publisher_id);
 
 -- CHAT
+DROP POLICY IF EXISTS "Chat rooms are public" ON public.chat_rooms;
 CREATE POLICY "Chat rooms are public"          ON public.chat_rooms    FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Publishers manage chat rooms" ON public.chat_rooms;
 CREATE POLICY "Publishers manage chat rooms"   ON public.chat_rooms    FOR ALL    USING (auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "Chat messages are public" ON public.chat_messages;
 CREATE POLICY "Chat messages are public"       ON public.chat_messages FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Authenticated users can chat" ON public.chat_messages;
 CREATE POLICY "Authenticated users can chat"   ON public.chat_messages FOR INSERT WITH CHECK (auth.uid() = author_id);
+DROP POLICY IF EXISTS "Users can edit own messages" ON public.chat_messages;
 CREATE POLICY "Users can edit own messages"    ON public.chat_messages FOR UPDATE USING (auth.uid() = author_id);
+DROP POLICY IF EXISTS "Users can delete own messages" ON public.chat_messages;
 CREATE POLICY "Users can delete own messages"  ON public.chat_messages FOR DELETE USING (auth.uid() = author_id);
 
 -- Q&A
+DROP POLICY IF EXISTS "Published questions are public" ON public.questions;
 CREATE POLICY "Published questions are public"  ON public.questions       FOR SELECT USING (is_published = TRUE OR auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "Authenticated users can ask" ON public.questions;
 CREATE POLICY "Authenticated users can ask"     ON public.questions       FOR INSERT WITH CHECK (auth.uid() = asker_id);
+DROP POLICY IF EXISTS "Publishers manage questions" ON public.questions;
 CREATE POLICY "Publishers manage questions"     ON public.questions       FOR UPDATE USING (auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "Question upvotes are public" ON public.question_upvotes;
 CREATE POLICY "Question upvotes are public"     ON public.question_upvotes FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Authenticated users can upvote" ON public.question_upvotes;
 CREATE POLICY "Authenticated users can upvote"  ON public.question_upvotes FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can remove upvotes" ON public.question_upvotes;
 CREATE POLICY "Users can remove upvotes"        ON public.question_upvotes FOR DELETE USING (auth.uid() = user_id);
 
 -- POST VERSIONS
+DROP POLICY IF EXISTS "Authors see own versions" ON public.post_versions;
 CREATE POLICY "Authors see own versions"  ON public.post_versions FOR SELECT USING (auth.uid() = author_id);
+DROP POLICY IF EXISTS "Authors insert versions" ON public.post_versions;
 CREATE POLICY "Authors insert versions"   ON public.post_versions FOR INSERT WITH CHECK (auth.uid() = author_id);
 
 -- TOPICS
+DROP POLICY IF EXISTS "Topics are public" ON public.topics;
 CREATE POLICY "Topics are public"         ON public.topics      FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Post topics are public" ON public.post_topics;
 CREATE POLICY "Post topics are public"    ON public.post_topics FOR SELECT USING (TRUE);
 
 -- AUDIO
+DROP POLICY IF EXISTS "Audio tracks are public" ON public.audio_tracks;
 CREATE POLICY "Audio tracks are public"   ON public.audio_tracks FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Authors manage audio" ON public.audio_tracks;
 CREATE POLICY "Authors manage audio"      ON public.audio_tracks FOR ALL USING (EXISTS(SELECT 1 FROM public.posts WHERE id = post_id AND author_id = auth.uid()));
 
 -- GIFT SUBSCRIPTIONS
+DROP POLICY IF EXISTS "Gifter sees own gifts" ON public.gift_subscriptions;
 CREATE POLICY "Gifter sees own gifts"     ON public.gift_subscriptions FOR SELECT USING (auth.uid() = gifter_id OR auth.uid() = recipient_id);
+DROP POLICY IF EXISTS "Authenticated users gift" ON public.gift_subscriptions;
 CREATE POLICY "Authenticated users gift"  ON public.gift_subscriptions FOR INSERT WITH CHECK (auth.uid() = gifter_id);
 
 -- UTM LINKS
+DROP POLICY IF EXISTS "Publishers see own UTM links" ON public.utm_links;
 CREATE POLICY "Publishers see own UTM links"   ON public.utm_links FOR SELECT USING (auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "Publishers create UTM links" ON public.utm_links;
 CREATE POLICY "Publishers create UTM links"    ON public.utm_links FOR INSERT WITH CHECK (auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "System updates UTM click count" ON public.utm_links;
 CREATE POLICY "System updates UTM click count" ON public.utm_links FOR UPDATE USING (TRUE);
 
 -- EMAIL SEQUENCES
+DROP POLICY IF EXISTS "Publishers see own sequences" ON public.email_sequences;
 CREATE POLICY "Publishers see own sequences"   ON public.email_sequences      FOR SELECT USING (auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "Publishers manage sequences" ON public.email_sequences;
 CREATE POLICY "Publishers manage sequences"    ON public.email_sequences      FOR ALL USING (auth.uid() = publisher_id);
+DROP POLICY IF EXISTS "Publishers see own seq steps" ON public.email_sequence_steps;
 CREATE POLICY "Publishers see own seq steps"   ON public.email_sequence_steps FOR SELECT USING (EXISTS(SELECT 1 FROM public.email_sequences WHERE id = sequence_id AND publisher_id = auth.uid()));
+DROP POLICY IF EXISTS "Publishers manage seq steps" ON public.email_sequence_steps;
 CREATE POLICY "Publishers manage seq steps"    ON public.email_sequence_steps FOR ALL USING (EXISTS(SELECT 1 FROM public.email_sequences WHERE id = sequence_id AND publisher_id = auth.uid()));
 
 -- SPONSORSHIPS
+DROP POLICY IF EXISTS "Sponsorships publicly visible" ON public.sponsorships;
 CREATE POLICY "Sponsorships publicly visible"  ON public.sponsorships FOR SELECT USING (status = 'active');
+DROP POLICY IF EXISTS "Publishers manage sponsorships" ON public.sponsorships;
 CREATE POLICY "Publishers manage sponsorships" ON public.sponsorships FOR ALL USING (auth.uid() = publisher_id);
 
 -- ============================================================
@@ -564,9 +682,13 @@ INSERT INTO storage.buckets (id, name, public) VALUES ('audio', 'audio', true)  
 INSERT INTO storage.buckets (id, name, public) VALUES ('publication-logos', 'publication-logos', true) ON CONFLICT DO NOTHING;
 INSERT INTO storage.buckets (id, name, public) VALUES ('sponsor-logos', 'sponsor-logos', true)   ON CONFLICT DO NOTHING;
 
+DROP POLICY IF EXISTS "Audio publicly accessible" ON storage.objects;
 CREATE POLICY "Audio publicly accessible"        ON storage.objects FOR SELECT USING (bucket_id = 'audio');
+DROP POLICY IF EXISTS "Authors can upload audio" ON storage.objects;
 CREATE POLICY "Authors can upload audio"         ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'audio' AND auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Logos publicly accessible" ON storage.objects;
 CREATE POLICY "Logos publicly accessible"        ON storage.objects FOR SELECT USING (bucket_id = 'publication-logos');
+DROP POLICY IF EXISTS "Users upload own publication logo" ON storage.objects;
 CREATE POLICY "Users upload own publication logo" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'publication-logos' AND auth.role() = 'authenticated');
 
 -- ============================================================
@@ -676,7 +798,8 @@ ALTER TABLE public.notifications
   ADD CONSTRAINT notifications_type_check CHECK (type IN (
     'new_post', 'new_comment', 'new_follower', 'post_like', 'comment_reply',
     'new_reaction', 'new_highlight', 'new_tip', 'new_paid_subscriber',
-    'new_question', 'milestone', 'new_chat_message'
+    'new_question', 'milestone', 'new_chat_message',
+    'admin_broadcast', 'admin_warning', 'admin_update'
   ));
 
 -- ============================================================

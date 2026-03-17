@@ -293,6 +293,14 @@ export const getForYouFeed = async (userId, page = 1, limit = 15) => {
 // ============================================================
 // ADMIN
 // ============================================================
+const chunkArray = (items, size) => {
+  const chunks = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+};
+
 export const getAdminStats = async () => {
   const [usersRes, postsRes, commentsRes, activeRes] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
@@ -316,14 +324,120 @@ export const getAdminStats = async () => {
   };
 };
 
-export const getAdminUsers = async (limit = 50) => {
-  const { data, error } = await supabase
+const fetchAllRows = async ({ table, select, pageSize = 1000, orderBy = null }) => {
+  let offset = 0;
+  let all = [];
+  while (true) {
+    let query = supabase.from(table).select(select).range(offset, offset + pageSize - 1);
+    if (orderBy) query = query.order(orderBy.column, { ascending: orderBy.ascending ?? false });
+    const { data, error } = await query;
+    if (error) return { data: null, error };
+    all = all.concat(data || []);
+    if (!data || data.length < pageSize) break;
+    offset += pageSize;
+  }
+  return { data: all, error: null };
+};
+
+export const getAdminMetrics = async () => {
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+  const dauSince = new Date(now - oneDay).toISOString();
+  const mauSince = new Date(now - 30 * oneDay).toISOString();
+  const retentionSince = new Date(now - 7 * oneDay).toISOString();
+  const eligibleSince = new Date(now - 7 * oneDay).toISOString();
+  const seriesSince = new Date(now - 13 * oneDay).toISOString();
+
+  const [dauRes, mauRes, activeRes, eligibleRes, postsRes, commentsRes, topicsRes] =
+    await Promise.all([
+      supabase.from("reading_history").select("user_id, last_read_at").gte("last_read_at", dauSince),
+      supabase.from("reading_history").select("user_id, last_read_at").gte("last_read_at", mauSince),
+      supabase.from("reading_history").select("user_id, last_read_at").gte("last_read_at", retentionSince),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).lte("created_at", eligibleSince),
+      supabase.from("posts").select("created_at").gte("created_at", seriesSince),
+      supabase.from("comments").select("created_at").gte("created_at", seriesSince),
+      supabase.from("post_topics").select("topic_id, topic:topics(name, slug, color)"),
+    ]);
+
+  const dauUsers = new Set((dauRes.data || []).map((row) => row.user_id));
+  const mauUsers = new Set((mauRes.data || []).map((row) => row.user_id));
+  const retentionUsers = new Set((activeRes.data || []).map((row) => row.user_id));
+  const eligibleUsers = eligibleRes.count || 0;
+  const retentionRate = eligibleUsers > 0 ? Math.round((retentionUsers.size / eligibleUsers) * 100) : 0;
+
+  const buildSeries = (rows) => {
+    const days = Array.from({ length: 14 }, (_, index) => {
+      const date = new Date(now - (13 - index) * oneDay);
+      return date.toISOString().slice(0, 10);
+    });
+    const counts = new Map(days.map((day) => [day, 0]));
+    (rows || []).forEach((row) => {
+      const day = new Date(row.created_at).toISOString().slice(0, 10);
+      counts.set(day, (counts.get(day) || 0) + 1);
+    });
+    return days.map((day) => ({ day, count: counts.get(day) || 0 }));
+  };
+
+  const postSeries = buildSeries(postsRes.data);
+  const commentSeries = buildSeries(commentsRes.data);
+
+  const topicCounts = new Map();
+  (topicsRes.data || []).forEach((row) => {
+    if (!row.topic) return;
+    const key = row.topic_id;
+    const current = topicCounts.get(key) || { ...row.topic, count: 0 };
+    current.count += 1;
+    topicCounts.set(key, current);
+  });
+
+  const topTopics = Array.from(topicCounts.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  return {
+    data: {
+      dau: dauUsers.size,
+      mau: mauUsers.size,
+      retentionRate,
+      postSeries,
+      commentSeries,
+      topTopics,
+    },
+    error:
+      dauRes.error ||
+      mauRes.error ||
+      activeRes.error ||
+      eligibleRes.error ||
+      postsRes.error ||
+      commentsRes.error ||
+      topicsRes.error,
+  };
+};
+
+export const getAdminUsers = async ({ limit = 50, query = "", status = "all", role = "all" } = {}) => {
+  let request = supabase
     .from("profiles")
-    .select("id, username, full_name, avatar_url, created_at, is_admin, is_suspended, suspended_at")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .select("id, username, full_name, avatar_url, created_at, is_admin, is_suspended, suspended_at, force_logout_at")
+    .order("created_at", { ascending: false });
+
+  if (query) {
+    request = request.or(`username.ilike.%${query}%,full_name.ilike.%${query}%`);
+  }
+  if (status === "active") request = request.eq("is_suspended", false);
+  if (status === "suspended") request = request.eq("is_suspended", true);
+  if (role === "admin") request = request.eq("is_admin", true);
+  if (role === "user") request = request.eq("is_admin", false);
+
+  const { data, error } = await request.limit(limit);
   return { data, error };
 };
+
+export const getAdminUsersExport = async () =>
+  fetchAllRows({
+    table: "profiles",
+    select: "id, username, full_name, created_at, is_admin, is_suspended, suspended_at, suspended_reason",
+    orderBy: { column: "created_at", ascending: false },
+  });
 
 export const getAdminPosts = async (limit = 50) => {
   const { data, error } = await supabase
@@ -334,6 +448,13 @@ export const getAdminPosts = async (limit = 50) => {
   return { data, error };
 };
 
+export const getAdminPostsExport = async () =>
+  fetchAllRows({
+    table: "posts_with_stats",
+    select: "id, title, slug, author_username, is_published, created_at, published_at, like_count, comment_count",
+    orderBy: { column: "created_at", ascending: false },
+  });
+
 export const getAdminComments = async (limit = 50) => {
   const { data, error } = await supabase
     .from("comments")
@@ -342,6 +463,13 @@ export const getAdminComments = async (limit = 50) => {
     .limit(limit);
   return { data, error };
 };
+
+export const getAdminCommentsExport = async () =>
+  fetchAllRows({
+    table: "comments",
+    select: "id, content, created_at, author:profiles(username), post:posts(title, slug)",
+    orderBy: { column: "created_at", ascending: false },
+  });
 
 export const setUserSuspended = async ({ userId, isSuspended, reason = null }) => {
   const { data, error } = await supabase
@@ -352,6 +480,198 @@ export const setUserSuspended = async ({ userId, isSuspended, reason = null }) =
       suspended_reason: isSuspended ? reason : null,
     })
     .eq("id", userId)
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const setUserRole = async ({ userId, isAdmin }) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ is_admin: isAdmin })
+    .eq("id", userId)
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const forceUserLogout = async ({ userId }) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ force_logout_at: new Date().toISOString() })
+    .eq("id", userId)
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const getAdminUserHistory = async (userId) => {
+  const [postsRes, commentsRes, readingRes] = await Promise.all([
+    supabase
+      .from("posts")
+      .select("id, title, slug, created_at, is_published")
+      .eq("author_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("comments")
+      .select("id, content, created_at, post:posts(title, slug)")
+      .eq("author_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("reading_history")
+      .select("id, progress, last_read_at, post:posts(title, slug)")
+      .eq("user_id", userId)
+      .order("last_read_at", { ascending: false })
+      .limit(5),
+  ]);
+
+  return {
+    data: {
+      posts: postsRes.data || [],
+      comments: commentsRes.data || [],
+      reading: readingRes.data || [],
+    },
+    error: postsRes.error || commentsRes.error || readingRes.error,
+  };
+};
+
+const fetchAllProfileIds = async () => {
+  const pageSize = 1000;
+  let offset = 0;
+  let all = [];
+  while (true) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id")
+      .range(offset, offset + pageSize - 1);
+    if (error) return { data: null, error };
+    all = all.concat(data || []);
+    if (!data || data.length < pageSize) break;
+    offset += pageSize;
+  }
+  return { data: all, error: null };
+};
+
+export const getAdminBroadcasts = async (limit = 20) => {
+  const { data, error } = await supabase
+    .from("admin_broadcasts")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const createAdminBroadcast = async ({ title, body, type, link }) => {
+  const { data: broadcast, error } = await supabase
+    .from("admin_broadcasts")
+    .insert({ title, body, type, link })
+    .select()
+    .single();
+  if (error) return { data: null, error };
+
+  const { data: profiles, error: profilesError } = await fetchAllProfileIds();
+  if (profilesError) return { data: broadcast, error: profilesError };
+
+  const notificationType =
+    type === "warning" ? "admin_warning" : type === "update" ? "admin_update" : "admin_broadcast";
+  const payload = (profiles || []).map((profile) => ({
+    user_id: profile.id,
+    type: notificationType,
+    title,
+    body,
+    link,
+  }));
+
+  const chunks = chunkArray(payload, 500);
+  for (const chunk of chunks) {
+    const { error: insertError } = await supabase.from("notifications").insert(chunk);
+    if (insertError) return { data: broadcast, error: insertError };
+  }
+
+  await supabase
+    .from("admin_broadcasts")
+    .update({ sent_count: payload.length })
+    .eq("id", broadcast.id);
+
+  return { data: broadcast, error: null };
+};
+
+export const getSecurityEvents = async (limit = 50) => {
+  const { data, error } = await supabase
+    .from("security_events")
+    .select("*, user:profiles(username, full_name)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const createSecurityEvent = async (payload) => {
+  const { data, error } = await supabase
+    .from("security_events")
+    .insert(payload)
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const getBannedIps = async (limit = 50) => {
+  const { data, error } = await supabase
+    .from("banned_ips")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const createBannedIp = async ({ ipRange, reason }) => {
+  const { data, error } = await supabase
+    .from("banned_ips")
+    .insert({ ip_range: ipRange, reason })
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const updateBannedIp = async ({ id, active }) => {
+  const updates = active ? { active: true, revoked_at: null } : { active: false, revoked_at: new Date().toISOString() };
+  const { data, error } = await supabase
+    .from("banned_ips")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const getRateLimitRules = async (limit = 50) => {
+  const { data, error } = await supabase
+    .from("rate_limit_rules")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return { data, error };
+};
+
+export const createRateLimitRule = async ({ scope, maxRequests, windowSeconds }) => {
+  const { data, error } = await supabase
+    .from("rate_limit_rules")
+    .insert({
+      scope,
+      max_requests: maxRequests,
+      window_seconds: windowSeconds,
+    })
+    .select()
+    .single();
+  return { data, error };
+};
+
+export const updateRateLimitRule = async ({ id, active }) => {
+  const { data, error } = await supabase
+    .from("rate_limit_rules")
+    .update({ active })
+    .eq("id", id)
     .select()
     .single();
   return { data, error };
