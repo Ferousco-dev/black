@@ -375,6 +375,14 @@ export const createComment = async ({
     })
     .select(`*, author:profiles(id, username, full_name, avatar_url)`)
     .single();
+  if (!error && data) {
+    await maybeNotifyOnComment({
+      postId,
+      comment: data,
+      parentId,
+      authorId,
+    });
+  }
   return { data, error };
 };
 
@@ -430,6 +438,9 @@ export const likePost = async (postId, userId) => {
     .insert({ post_id: postId, user_id: userId })
     .select()
     .single();
+  if (!error && data) {
+    await maybeNotifyOnLike({ postId, actorId: userId });
+  }
   return { data, error };
 };
 
@@ -461,6 +472,9 @@ export const followUser = async (followerId, followingId) => {
     .insert({ follower_id: followerId, following_id: followingId })
     .select()
     .single();
+  if (!error && data) {
+    await maybeNotifyOnFollow({ followerId, followingId });
+  }
   return { data, error };
 };
 
@@ -619,6 +633,130 @@ export const getUnreadNotificationCount = async (userId) => {
     .eq("user_id", userId)
     .eq("is_read", false);
   return { count, error };
+};
+
+// ============================================================
+// NOTIFICATION HELPERS
+// ============================================================
+const createNotification = async ({
+  userId,
+  type,
+  title,
+  body = null,
+  link = null,
+  actorId = null,
+  postId = null,
+  commentId = null,
+}) => {
+  if (!userId || !type || !title) return;
+  await supabase.from("notifications").insert({
+    user_id: userId,
+    type,
+    title,
+    body,
+    link,
+    actor_id: actorId,
+    post_id: postId,
+    comment_id: commentId,
+  });
+};
+
+const truncateText = (text = "", max = 120) => {
+  if (text.length <= max) return text;
+  return `${text.slice(0, max - 1)}…`;
+};
+
+const getProfileLite = async (userId) => {
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, username, full_name")
+    .eq("id", userId)
+    .single();
+  return data;
+};
+
+const getPostLite = async (postId) => {
+  const { data } = await supabase
+    .from("posts_with_stats")
+    .select("id, title, slug, author_id")
+    .eq("id", postId)
+    .single();
+  return data;
+};
+
+const getCommentLite = async (commentId) => {
+  const { data } = await supabase
+    .from("comments")
+    .select("id, author_id")
+    .eq("id", commentId)
+    .single();
+  return data;
+};
+
+const maybeNotifyOnLike = async ({ postId, actorId }) => {
+  const post = await getPostLite(postId);
+  if (!post || post.author_id === actorId) return;
+  const actor = await getProfileLite(actorId);
+  const actorName = actor?.full_name || actor?.username || "Someone";
+  await createNotification({
+    userId: post.author_id,
+    type: "post_like",
+    title: `${actorName} liked your post`,
+    body: post.title,
+    link: `/p/${post.slug}`,
+    actorId,
+    postId: post.id,
+  });
+};
+
+const maybeNotifyOnFollow = async ({ followerId, followingId }) => {
+  if (followerId === followingId) return;
+  const actor = await getProfileLite(followerId);
+  const actorName = actor?.full_name || actor?.username || "Someone";
+  await createNotification({
+    userId: followingId,
+    type: "new_follower",
+    title: `${actorName} followed you`,
+    link: `/@${actor?.username || ""}`,
+    actorId: followerId,
+  });
+};
+
+const maybeNotifyOnComment = async ({ postId, comment, parentId, authorId }) => {
+  const post = await getPostLite(postId);
+  if (!post) return;
+  const actor = await getProfileLite(authorId);
+  const actorName = actor?.full_name || actor?.username || "Someone";
+  const body = truncateText(comment.content || "", 120);
+
+  if (post.author_id && post.author_id !== authorId) {
+    await createNotification({
+      userId: post.author_id,
+      type: "new_comment",
+      title: `${actorName} commented on your post`,
+      body,
+      link: `/p/${post.slug}`,
+      actorId: authorId,
+      postId: post.id,
+      commentId: comment.id,
+    });
+  }
+
+  if (parentId) {
+    const parent = await getCommentLite(parentId);
+    if (parent?.author_id && parent.author_id !== authorId) {
+      await createNotification({
+        userId: parent.author_id,
+        type: "comment_reply",
+        title: `${actorName} replied to your comment`,
+        body,
+        link: `/p/${post.slug}`,
+        actorId: authorId,
+        postId: post.id,
+        commentId: comment.id,
+      });
+    }
+  }
 };
 
 // ============================================================
