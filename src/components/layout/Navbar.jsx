@@ -94,6 +94,16 @@ export default function Navbar() {
           >
             Discover
           </Link>
+          {user && (
+            <Link
+              to="/for-you"
+              className={
+                "nav-link" + (location.pathname === "/for-you" ? " active" : "")
+              }
+            >
+              For You
+            </Link>
+          )}
           <Link
             to="/topics"
             className={
@@ -373,6 +383,21 @@ export default function Navbar() {
               </svg>
               <span>Discover</span>
             </Link>
+            {user && (
+              <Link to="/for-you" className="mobile-link-item">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M12 3l3 6 6 .9-4.5 4.4 1.1 6.4L12 17l-5.6 3.7 1.1-6.4L3 9.9 9 9z" />
+                </svg>
+                <span>For You</span>
+              </Link>
+            )}
             <Link to="/topics" className="mobile-link-item">
               <svg
                 width="20"

@@ -22,6 +22,7 @@ import Discovery from "./pages/Discovery";
 import Community from "./pages/Community";
 import Topics from "./pages/Topics";
 import TopicHub from "./pages/TopicHub";
+import ForYou from "./pages/ForYou";
 import "./styles/global.css";
 
 function ProtectedRoute({ children }) {
@@ -56,6 +57,7 @@ function AppLayout() {
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/search" element={<Search />} />
           <Route path="/discover" element={<Discovery />} />
+          <Route path="/for-you" element={<ForYou />} />
           <Route path="/topics" element={<Topics />} />
           <Route path="/topics/:slug" element={<TopicHub />} />
           <Route path="/p/:slug" element={<PostView />} />

@@ -211,6 +211,77 @@ export const getPostsByTags = async (tags = [], excludePostId = null, limit = 6)
   return { data, error };
 };
 
+export const getForYouFeed = async (userId, page = 1, limit = 15) => {
+  const fetchLimit = page * limit + 10;
+
+  const { data: followedUsers } = await supabase
+    .from("follows")
+    .select("following_id")
+    .eq("follower_id", userId);
+  const followedIds = followedUsers?.map((f) => f.following_id) || [];
+
+  const { data: history } = await supabase
+    .from("reading_history")
+    .select("post:posts_with_stats(tags)")
+    .eq("user_id", userId)
+    .order("last_read_at", { ascending: false })
+    .limit(20);
+  const tagSet = new Set();
+  (history || []).forEach((item) => {
+    const tags = item.post?.tags || [];
+    tags.forEach((tag) => tagSet.add(tag));
+  });
+  const tags = Array.from(tagSet);
+
+  const followedPostsQuery = followedIds.length
+    ? supabase
+        .from("posts_with_stats")
+        .select("*")
+        .eq("is_published", true)
+        .in("author_id", followedIds)
+        .order("published_at", { ascending: false })
+        .limit(fetchLimit)
+    : null;
+
+  const tagPostsQuery = tags.length
+    ? supabase
+        .from("posts_with_stats")
+        .select("*")
+        .eq("is_published", true)
+        .overlaps("tags", tags)
+        .order("published_at", { ascending: false })
+        .limit(fetchLimit)
+    : null;
+
+  const recentPostsQuery = supabase
+    .from("posts_with_stats")
+    .select("*")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
+    .limit(fetchLimit);
+
+  const [followedPostsRes, tagPostsRes, recentPostsRes] = await Promise.all([
+    followedPostsQuery,
+    tagPostsQuery,
+    recentPostsQuery,
+  ]);
+
+  const merged = new Map();
+  (followedPostsRes?.data || []).forEach((post) => merged.set(post.id, post));
+  (tagPostsRes?.data || []).forEach((post) => merged.set(post.id, post));
+  (recentPostsRes?.data || []).forEach((post) => merged.set(post.id, post));
+
+  const items = Array.from(merged.values()).sort((a, b) => {
+    const aDate = new Date(a.published_at || a.created_at).getTime();
+    const bDate = new Date(b.published_at || b.created_at).getTime();
+    return bDate - aDate;
+  });
+
+  const start = (page - 1) * limit;
+  const end = start + limit;
+  return { data: items.slice(start, end), error: null };
+};
+
 export const getUserDraftPosts = async (userId) => {
   const { data, error } = await supabase
     .from("posts")
