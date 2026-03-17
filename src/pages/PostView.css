@@ -128,14 +128,15 @@
   gap: 12px;
 }
 .share-preview-frame {
-  background: var(--off-white);
+  background: transparent;
   border-radius: 16px;
-  padding: 16px;
-  border: 1px solid var(--border-light);
+  padding: 10px;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
+  min-height: 300px;
 }
 .share-preview-actions {
   margin-top: 12px;
@@ -180,6 +181,7 @@
 @media (max-width: 900px) {
   .share-panel-body { grid-template-columns: 1fr; }
   .share-preview-actions { justify-content: flex-start; }
+  .share-preview-frame { padding: 6px; min-height: 240px; }
 }
 
 @media (max-width: 600px) {
