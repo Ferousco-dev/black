@@ -76,6 +76,7 @@ export default function Home() {
           <main className="home-main">
             <div className="home-header">
               <h1 className="home-title">Latest Posts</h1>
+              <p className="home-subtitle">Thoughtful writing from people worth following.</p>
             </div>
 
             {user && resumeItems.length > 0 && (

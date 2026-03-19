@@ -84,7 +84,7 @@ export default function PostView() {
   const loadPost = async () => {
     const cacheKey = buildCacheKey("post", slug);
     const cached = getCache(cacheKey);
-    if (cached) {
+    if (cached && cached.id) {
       setPost(cached);
       setLikeCount(cached.like_count || 0);
       setPdfViewerUrl(await resolvePdfUrl(cached.pdf_url));
@@ -296,7 +296,7 @@ export default function PostView() {
     setCache(cacheKey, { topics, related });
   };
 
-  if (loading) return <LoadingPage variant="detail" />;
+  if (loading || !post) return <LoadingPage variant="detail" />;
 
   const initials = post.author_full_name
     ? post.author_full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
