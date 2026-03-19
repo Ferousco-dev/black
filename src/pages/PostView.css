@@ -15,6 +15,10 @@
 .pdf-info { flex: 1; min-width: 0; }
 .pdf-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pdf-label { font-size: 0.775rem; color: var(--text-muted); }
+.pdf-viewer { margin-top: 16px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--white); }
+.pdf-frame { width: 100%; height: min(70vh, 720px); border: 0; display: block; }
+.pdf-open-link { display: inline-flex; margin-top: 10px; font-size: 0.8rem; color: var(--navy); text-decoration: none; }
+.pdf-open-link:hover { text-decoration: underline; }
 .post-view-actions { display: flex; align-items: center; gap: 8px; padding: 1.5rem 0; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); margin-bottom: 1.5rem; }
 .action-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 100px; background: var(--white); font-size: 0.875rem; color: var(--text-secondary); font-family: var(--font-sans); cursor: pointer; transition: all 0.15s; text-decoration: none; }
 .action-btn:hover { border-color: var(--navy); color: var(--navy); }

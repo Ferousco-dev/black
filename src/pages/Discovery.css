@@ -24,18 +24,29 @@
 .filter-tabs { display: flex; gap: 4px; }
 .filter-tab { padding: 5px 14px; border: 1.5px solid var(--border); border-radius: 20px; background: var(--white); font-size: 0.8rem; font-weight: 500; cursor: pointer; color: var(--text-secondary); font-family: var(--font-sans); transition: all 0.15s; }
 .filter-tab.active { background: var(--navy); color: var(--text-on-accent); border-color: var(--navy); }
-.post-list { display: flex; flex-direction: column; gap: 1px; }
-.post-row { display: flex; gap: 16px; align-items: flex-start; padding: 18px 0; border-bottom: 1px solid var(--border-light); text-decoration: none; transition: all 0.1s; }
-.post-row:hover .post-row-title { color: var(--navy); }
-.post-row-img { width: 80px; height: 60px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
-.post-row-body { flex: 1; min-width: 0; }
-.post-row-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.post-row-avatar { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
-.post-row-author { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
-.post-row-tag { font-size: 0.7rem; background: var(--off-white); border: 1px solid var(--border); padding: 1px 7px; border-radius: 12px; color: var(--text-muted); }
-.post-row-title { font-family: var(--font-serif); font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; line-height: 1.35; transition: color 0.1s; }
-.post-row-sub { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.post-row-stats { display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted); }
+.post-list { display: flex; flex-direction: column; gap: 16px; }
+.post-card { display: flex; flex-direction: column; gap: 12px; padding: 18px; border: 1px solid var(--border-light); border-radius: 14px; background: var(--white); text-decoration: none; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
+.post-card:hover { border-color: var(--navy); box-shadow: 0 10px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.post-card-header { display: flex; align-items: center; gap: 10px; }
+.post-card-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.post-card-author { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.post-card-name { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+.post-card-handle { font-size: 0.75rem; color: var(--text-muted); }
+.post-card-time { color: var(--text-muted); }
+.post-card-tag { margin-left: auto; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); background: var(--off-white); border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; }
+.post-card-content { display: flex; flex-direction: column; gap: 6px; }
+.post-card-title { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 700; color: var(--text-primary); line-height: 1.35; }
+.post-card-text { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45; }
+.post-card-media { display: grid; gap: 8px; border-radius: 12px; overflow: hidden; }
+.post-card-media.grid-1 { grid-template-columns: 1fr; }
+.post-card-media.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.post-card-media.grid-3 { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; }
+.post-card-media.grid-3 .post-card-media-item:first-child { grid-column: span 2; }
+.post-card-media.grid-4 { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; }
+.post-card-media-item { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 10px; }
+.post-card-media-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.post-card-media-more { position: absolute; inset: 0; background: rgba(0,0,0,0.45); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; }
+.post-card-actions { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.75rem; color: var(--text-muted); }
 .audience-lock { font-weight: 600; color: #92400e; }
 .authors-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
 .author-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--white); border: 1px solid var(--border-light); border-radius: 10px; text-decoration: none; transition: border-color 0.15s; }

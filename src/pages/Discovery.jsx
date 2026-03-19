@@ -135,25 +135,66 @@ export default function Discovery() {
 }
 
 function PostRow({ post }) {
+  const media = (post.image_urls && post.image_urls.length > 0)
+    ? post.image_urls
+    : post.cover_image_url ? [post.cover_image_url] : [];
+  const mediaPreview = media.slice(0, 4);
+  const extraCount = media.length - mediaPreview.length;
+  const timeLabel = post.published_at ? formatTimeAgo(new Date(post.published_at)) : null;
+
   return (
-    <Link to={`/p/${post.slug}`} className="post-row">
-      {post.cover_image_url && <img src={post.cover_image_url} className="post-row-img" alt=""/>}
-      <div className="post-row-body">
-        <div className="post-row-meta">
-          <img src={post.author_avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${post.author_username}`} className="post-row-avatar" alt=""/>
-          <span className="post-row-author">{post.author_full_name || post.author_username}</span>
-          {post.tags?.[0] && <span className="post-row-tag">{post.tags[0]}</span>}
+    <Link to={`/p/${post.slug}`} className="post-card">
+      <div className="post-card-header">
+        <img src={post.author_avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${post.author_username}`} className="post-card-avatar" alt=""/>
+        <div className="post-card-author">
+          <span className="post-card-name">{post.author_full_name || post.author_username}</span>
+          <span className="post-card-handle">
+            @{post.author_username}
+            {timeLabel && <span className="post-card-time"> · {timeLabel}</span>}
+          </span>
         </div>
-        <h3 className="post-row-title">{post.title}</h3>
-        {post.subtitle && <p className="post-row-sub">{post.subtitle}</p>}
-        <div className="post-row-stats">
-          <span>👁 {(post.view_count||0).toLocaleString()}</span>
-          <span>❤️ {parseInt(post.like_count)||0}</span>
-          <span>💬 {parseInt(post.comment_count)||0}</span>
-          {post.reading_time_mins && <span>⏱ {post.reading_time_mins} min</span>}
-          {post.audience !== 'everyone' && <span className="audience-lock">🔒 {post.audience}</span>}
+        {post.tags?.[0] && <span className="post-card-tag">#{post.tags[0]}</span>}
+      </div>
+      <div className="post-card-content">
+        <h3 className="post-card-title">{post.title}</h3>
+        {post.subtitle && <p className="post-card-text">{post.subtitle}</p>}
+      </div>
+      {mediaPreview.length > 0 && (
+        <div className={`post-card-media grid-${Math.min(mediaPreview.length, 4)}`}>
+          {mediaPreview.map((url, idx) => (
+            <div key={`${post.id}-media-${idx}`} className="post-card-media-item">
+              <img src={url} alt="" />
+              {idx === 3 && extraCount > 0 && (
+                <span className="post-card-media-more">+{extraCount}</span>
+              )}
+            </div>
+          ))}
         </div>
+      )}
+      <div className="post-card-actions">
+        <span>💬 {parseInt(post.comment_count) || 0}</span>
+        <span>🔁 {parseInt(post.view_count) || 0}</span>
+        <span>❤️ {parseInt(post.like_count) || 0}</span>
+        <span>📌 {parseInt(post.bookmark_count) || 0}</span>
+        {post.audience !== 'everyone' && <span className="audience-lock">🔒 {post.audience}</span>}
       </div>
     </Link>
   );
+}
+
+function formatTimeAgo(date) {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}w`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months}mo`;
+  const years = Math.floor(days / 365);
+  return `${years}y`;
 }

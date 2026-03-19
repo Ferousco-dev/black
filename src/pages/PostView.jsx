@@ -33,6 +33,7 @@ export default function PostView() {
   const shareExportRef = useRef(null);
   const contentRef = useRef(null);
   const lastProgressRef = useRef({ value: 0, at: 0 });
+  const lastTapRef = useRef(0);
 
   useEffect(() => {
     loadPost();
@@ -93,6 +94,18 @@ export default function PostView() {
       setLiked(true); setLikeCount(c => c + 1);
       await likePost(post.id, user.id);
     }
+  };
+
+  const handleDoubleTapLike = () => {
+    if (!liked) handleLike();
+  };
+
+  const handleTouchLike = () => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      handleDoubleTapLike();
+    }
+    lastTapRef.current = now;
   };
 
   const handleBookmark = async () => {
@@ -304,13 +317,23 @@ export default function PostView() {
 
         {/* Cover image */}
         {post.cover_image_url && (
-          <div className="post-view-cover">
+          <div
+            className="post-view-cover"
+            onDoubleClick={handleDoubleTapLike}
+            onTouchEnd={handleTouchLike}
+          >
             <img src={post.cover_image_url} alt={post.title} />
           </div>
         )}
 
         {/* Content */}
-        <div ref={contentRef} className="prose post-view-content" dangerouslySetInnerHTML={{ __html: post.content_html || post.content }} />
+        <div
+          ref={contentRef}
+          className="prose post-view-content"
+          onDoubleClick={handleDoubleTapLike}
+          onTouchEnd={handleTouchLike}
+          dangerouslySetInnerHTML={{ __html: post.content_html || post.content }}
+        />
 
         <Highlights postId={post.id} containerRef={contentRef} onShareQuote={handleShareQuote} />
 
@@ -325,11 +348,15 @@ export default function PostView() {
                 <div className="pdf-name">{post.pdf_filename || 'Attached PDF'}</div>
                 <div className="pdf-label">PDF Document</div>
               </div>
-              <a href={post.pdf_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Download
-              </a>
             </div>
+            <div className="pdf-viewer">
+              <object data={post.pdf_url} type="application/pdf" className="pdf-frame" aria-label="PDF document">
+                <iframe src={post.pdf_url} title="PDF document" className="pdf-frame" />
+              </object>
+            </div>
+            <a href={post.pdf_url} target="_blank" rel="noopener noreferrer" className="pdf-open-link">
+              Open PDF in new tab
+            </a>
           </div>
         )}
 
