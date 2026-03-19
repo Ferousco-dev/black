@@ -22,7 +22,7 @@
 .post-view-actions { display: flex; align-items: center; gap: 8px; padding: 1.5rem 0; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); margin-bottom: 1.5rem; }
 .action-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 100px; background: var(--white); font-size: 0.875rem; color: var(--text-secondary); font-family: var(--font-sans); cursor: pointer; transition: all 0.15s; text-decoration: none; }
 .action-btn:hover { border-color: var(--navy); color: var(--navy); }
-.action-btn.active { background: var(--navy); color: var(--text-on-accent); border-color: var(--navy); }
+.action-btn.active { background: var(--white); color: var(--text-primary); border-color: var(--text-primary); }
 .post-view-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2.5rem; }
 .author-card { padding: 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 3rem; }
 .author-card-link { display: flex; align-items: center; gap: 14px; flex: 1; }
