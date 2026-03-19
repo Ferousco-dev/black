@@ -18,6 +18,7 @@ import PostCard from "../components/posts/PostCard";
 import ProfileStatsCard from "../components/share/ProfileStatsCard";
 import toast from "react-hot-toast";
 import LoadingPage from "../components/ui/LoadingPage";
+import { buildCacheKey, getCache, setCache } from "../lib/cache";
 import "./Profile.css";
 
 export default function Profile() {
@@ -62,6 +63,16 @@ export default function Profile() {
 
   const loadProfile = async () => {
     const clean = atUsername.startsWith("@") ? atUsername.slice(1) : atUsername;
+    const cacheKey = buildCacheKey("profile", clean);
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setProfile(cached.profile || null);
+      setPosts(cached.posts || []);
+      setFollowers(cached.followers || []);
+      setQuestions(cached.questions || []);
+      setLoading(false);
+      return;
+    }
     const { data: prof, error } = await getProfileByUsername(clean);
     if (error || !prof) {
       setLoading(false);
@@ -79,6 +90,12 @@ export default function Profile() {
     setPosts(postsRes.data || []);
     setFollowers(followersRes.data || []);
     setQuestions(questionsRes.data || []);
+    setCache(cacheKey, {
+      profile: prof,
+      posts: postsRes.data || [],
+      followers: followersRes.data || [],
+      questions: questionsRes.data || [],
+    });
     setLoading(false);
   };
 

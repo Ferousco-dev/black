@@ -3,6 +3,7 @@ import { getPosts, getResumeReading } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 import PostCard from "../components/posts/PostCard";
 import LoadingPage from "../components/ui/LoadingPage";
+import { buildCacheKey, getCache, setCache } from "../lib/cache";
 import "./Home.css";
 
 export default function Home() {
@@ -23,11 +24,26 @@ export default function Home() {
   }, [user]);
 
   const loadPosts = async (p, reset = false) => {
+    if (reset && p === 1) {
+      const cached = getCache(buildCacheKey("home", "posts", "page", p));
+      if (cached) {
+        setPosts(cached.posts || []);
+        setHasMore(!!cached.hasMore);
+        setLoading(false);
+        return;
+      }
+    }
     setLoading(true);
     const { data } = await getPosts({ page: p, limit: 15 });
     if (reset) setPosts(data || []);
     else setPosts((prev) => [...prev, ...(data || [])]);
     setHasMore((data || []).length === 15);
+    if (reset && p === 1) {
+      setCache(buildCacheKey("home", "posts", "page", p), {
+        posts: data || [],
+        hasMore: (data || []).length === 15,
+      });
+    }
     setLoading(false);
   };
 
@@ -38,12 +54,19 @@ export default function Home() {
   };
 
   const loadResume = async () => {
+    const cached = getCache(buildCacheKey("home", "resume", user.id));
+    if (cached) {
+      setResumeItems(cached);
+      return;
+    }
     const { data } = await getResumeReading(user.id, 5);
-    setResumeItems((data || []).map((item) => ({
+    const next = (data || []).map((item) => ({
       ...item,
       post: item.post,
       progress: item.progress || 0,
-    })));
+    }));
+    setResumeItems(next);
+    setCache(buildCacheKey("home", "resume", user.id), next);
   };
 
   return (

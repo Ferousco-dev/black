@@ -5,6 +5,7 @@ import { getNotifications, markNotificationRead, markAllNotificationsRead } from
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Notifications.css';
 
 const icons = {
@@ -48,15 +49,25 @@ export default function Notifications() {
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'notifications',
         filter: `user_id=eq.${user.id}`
-      }, () => loadNotifications())
+      }, () => loadNotifications(true))
       .subscribe();
 
     return () => supabase.removeChannel(channel);
   }, [user]);
 
-  const loadNotifications = async () => {
+  const loadNotifications = async (force = false) => {
+    const cacheKey = buildCacheKey("notifications", user.id);
+    if (!force) {
+      const cached = getCache(cacheKey);
+      if (cached) {
+        setNotifications(cached);
+        setLoading(false);
+        return;
+      }
+    }
     const { data } = await getNotifications(user.id);
     setNotifications(data || []);
+    setCache(cacheKey, data || []);
     setLoading(false);
   };
 

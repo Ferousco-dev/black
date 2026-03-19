@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getTopics } from '../lib/api';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Topics.css';
 
 export default function Topics() {
@@ -13,8 +14,16 @@ export default function Topics() {
   }, []);
 
   const load = async () => {
+    const cacheKey = buildCacheKey("topics", "list");
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setTopics(cached);
+      setLoading(false);
+      return;
+    }
     const { data } = await getTopics(40);
     setTopics(data || []);
+    setCache(cacheKey, data || []);
     setLoading(false);
   };
 

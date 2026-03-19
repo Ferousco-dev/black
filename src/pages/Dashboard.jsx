@@ -5,6 +5,7 @@ import { getUserPublishedPosts, getUserDraftPosts, deletePost, unpublishPost } f
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -19,12 +20,21 @@ export default function Dashboard() {
   }, [user]);
 
   const loadPosts = async () => {
+    const cacheKey = buildCacheKey("dashboard", user.id);
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setPublished(cached.published || []);
+      setDrafts(cached.drafts || []);
+      setLoading(false);
+      return;
+    }
     const [pub, drf] = await Promise.all([
       getUserPublishedPosts(user.id),
       getUserDraftPosts(user.id),
     ]);
     setPublished(pub.data || []);
     setDrafts(drf.data || []);
+    setCache(cacheKey, { published: pub.data || [], drafts: drf.data || [] });
     setLoading(false);
   };
 

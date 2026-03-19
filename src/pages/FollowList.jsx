@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getProfileByUsername, getFollowers, getFollowing } from '../lib/api';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './FollowList.css';
 
 export default function FollowList() {
@@ -21,12 +22,21 @@ export default function FollowList() {
 
   const load = async () => {
     const clean = atUsername.startsWith('@') ? atUsername.slice(1) : atUsername;
+    const cacheKey = buildCacheKey("followlist", clean, type);
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setProfile(cached.profile || null);
+      setUsers(cached.users || []);
+      setLoading(false);
+      return;
+    }
     const { data: prof } = await getProfileByUsername(clean);
     if (!prof) { navigate('/'); return; }
     setProfile(prof);
     const fn = type === 'followers' ? getFollowers : getFollowing;
     const { data } = await fn(prof.id);
     setUsers(data || []);
+    setCache(cacheKey, { profile: prof, users: data || [] });
     setLoading(false);
   };
 

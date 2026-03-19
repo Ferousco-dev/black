@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { getTopicBySlug, getPostsByTopic } from '../lib/api';
 import PostCard from '../components/posts/PostCard';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './TopicHub.css';
 
 export default function TopicHub() {
@@ -17,11 +18,23 @@ export default function TopicHub() {
 
   const load = async () => {
     setLoading(true);
+    const cacheKey = buildCacheKey("topic", slug);
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setTopic(cached.topic || null);
+      setPosts(cached.posts || []);
+      setLoading(false);
+      return;
+    }
     const { data: topicData } = await getTopicBySlug(slug);
     setTopic(topicData);
     if (topicData?.id) {
       const { data } = await getPostsByTopic(topicData.id, 20);
       setPosts((data || []).map((item) => item.post).filter(Boolean));
+      setCache(cacheKey, {
+        topic: topicData,
+        posts: (data || []).map((item) => item.post).filter(Boolean),
+      });
     } else {
       setPosts([]);
     }

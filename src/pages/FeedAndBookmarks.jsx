@@ -4,6 +4,7 @@ import { getFeedPosts, getUserBookmarks } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import PostCard from '../components/posts/PostCard';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 
 export function Feed() {
   const { user } = useAuth();
@@ -11,7 +12,18 @@ export function Feed() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) getFeedPosts(user.id).then(({ data }) => { setPosts(data || []); setLoading(false); });
+    if (!user) return;
+    const cached = getCache(buildCacheKey("feed", user.id));
+    if (cached) {
+      setPosts(cached);
+      setLoading(false);
+      return;
+    }
+    getFeedPosts(user.id).then(({ data }) => {
+      setPosts(data || []);
+      setCache(buildCacheKey("feed", user.id), data || []);
+      setLoading(false);
+    });
   }, [user]);
 
   return (
@@ -40,7 +52,18 @@ export function Bookmarks() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) getUserBookmarks(user.id).then(({ data }) => { setPosts(data || []); setLoading(false); });
+    if (!user) return;
+    const cached = getCache(buildCacheKey("bookmarks", user.id));
+    if (cached) {
+      setPosts(cached);
+      setLoading(false);
+      return;
+    }
+    getUserBookmarks(user.id).then(({ data }) => {
+      setPosts(data || []);
+      setCache(buildCacheKey("bookmarks", user.id), data || []);
+      setLoading(false);
+    });
   }, [user]);
 
   return (

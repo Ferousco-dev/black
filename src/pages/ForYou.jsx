@@ -4,6 +4,7 @@ import { getForYouFeed } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 import PostCard from "../components/posts/PostCard";
 import LoadingPage from "../components/ui/LoadingPage";
+import { buildCacheKey, getCache, setCache } from "../lib/cache";
 import "./ForYou.css";
 
 export default function ForYou() {
@@ -22,11 +23,26 @@ export default function ForYou() {
   }, [user]);
 
   const load = async (p, reset = false) => {
+    if (reset && p === 1) {
+      const cached = getCache(buildCacheKey("foryou", user.id, "page", p));
+      if (cached) {
+        setPosts(cached.posts || []);
+        setHasMore(!!cached.hasMore);
+        setLoading(false);
+        return;
+      }
+    }
     setLoading(true);
     const { data } = await getForYouFeed(user.id, p, 12);
     if (reset) setPosts(data || []);
     else setPosts((prev) => [...prev, ...(data || [])]);
     setHasMore((data || []).length === 12);
+    if (reset && p === 1) {
+      setCache(buildCacheKey("foryou", user.id, "page", p), {
+        posts: data || [],
+        hasMore: (data || []).length === 12,
+      });
+    }
     setLoading(false);
   };
 

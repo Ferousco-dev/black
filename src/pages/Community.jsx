@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { useParams } from 'react-router-dom';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Community.css';
 
 export default function Community() {
@@ -33,20 +34,43 @@ export default function Community() {
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   async function loadCommunity() {
+    const cacheKey = buildCacheKey("community", username);
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setPublisher(cached.publisher || null);
+      setRooms(cached.rooms || []);
+      if (cached.activeRoomId) {
+        const room = (cached.rooms || []).find((r) => r.id === cached.activeRoomId);
+        if (room) setActiveRoom(room);
+      }
+      return;
+    }
     const { data: pub } = await supabase.from('profiles').select('*').eq('username', username).single();
     setPublisher(pub);
     if (pub) {
       const { data } = await supabase.from('chat_rooms').select('*').eq('publisher_id', pub.id).order('created_at');
       setRooms(data || []);
       if (data?.[0]) setActiveRoom(data[0]);
+      setCache(cacheKey, {
+        publisher: pub,
+        rooms: data || [],
+        activeRoomId: data?.[0]?.id || null,
+      });
     }
   }
 
   async function loadMessages(roomId) {
+    const cacheKey = buildCacheKey("community", "messages", roomId);
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setMessages(cached);
+      return;
+    }
     const { data } = await supabase.from('chat_messages')
       .select('*, author:profiles!author_id(id, username, full_name, avatar_url)')
       .eq('room_id', roomId).order('created_at').limit(100);
     setMessages(data || []);
+    setCache(cacheKey, data || []);
   }
 
   async function sendMessage() {

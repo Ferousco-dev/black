@@ -29,6 +29,7 @@ import { useAuth } from "../hooks/useAuth";
 import AdminGrowthCard from "../components/share/AdminGrowthCard";
 import toast from "react-hot-toast";
 import LoadingPage from "../components/ui/LoadingPage";
+import { buildCacheKey, getCache, setCache } from "../lib/cache";
 import "./Admin.css";
 
 export default function Admin() {
@@ -112,13 +113,34 @@ export default function Admin() {
 
   const loadOverview = async () => {
     setLoading(true);
+    const cacheKey = buildCacheKey("admin", "overview");
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setStats(cached);
+      setLoading(false);
+      return;
+    }
     const statsRes = await getAdminStats();
     setStats(statsRes.data);
+    setCache(cacheKey, statsRes.data || null);
     setLoading(false);
   };
 
   const loadUsers = async () => {
     setUsersLoading(true);
+    const cacheKey = buildCacheKey(
+      "admin",
+      "users",
+      userQuery.trim() || "all",
+      userStatusFilter,
+      userRoleFilter
+    );
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setUsers(cached);
+      setUsersLoading(false);
+      return;
+    }
     const usersRes = await getAdminUsers({
       limit: 80,
       query: userQuery.trim(),
@@ -126,39 +148,81 @@ export default function Admin() {
       role: userRoleFilter,
     });
     setUsers(usersRes.data || []);
+    setCache(cacheKey, usersRes.data || []);
     setUsersLoading(false);
   };
 
   const loadPosts = async () => {
     setPostsLoading(true);
+    const cacheKey = buildCacheKey("admin", "posts");
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setPosts(cached);
+      setPostsLoading(false);
+      return;
+    }
     const postsRes = await getAdminPosts(60);
     setPosts(postsRes.data || []);
+    setCache(cacheKey, postsRes.data || []);
     setPostsLoading(false);
   };
 
   const loadComments = async () => {
     setCommentsLoading(true);
+    const cacheKey = buildCacheKey("admin", "comments");
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setComments(cached);
+      setCommentsLoading(false);
+      return;
+    }
     const commentsRes = await getAdminComments(60);
     setComments(commentsRes.data || []);
+    setCache(cacheKey, commentsRes.data || []);
     setCommentsLoading(false);
   };
 
   const loadMetrics = async () => {
     setMetricsLoading(true);
+    const cacheKey = buildCacheKey("admin", "metrics");
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setMetrics(cached);
+      setMetricsLoading(false);
+      return;
+    }
     const metricsRes = await getAdminMetrics();
     setMetrics(metricsRes.data);
+    setCache(cacheKey, metricsRes.data || null);
     setMetricsLoading(false);
   };
 
   const loadBroadcasts = async () => {
     setBroadcastLoading(true);
+    const cacheKey = buildCacheKey("admin", "broadcasts");
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setBroadcasts(cached);
+      setBroadcastLoading(false);
+      return;
+    }
     const broadcastsRes = await getAdminBroadcasts(20);
     setBroadcasts(broadcastsRes.data || []);
+    setCache(cacheKey, broadcastsRes.data || []);
     setBroadcastLoading(false);
   };
 
   const loadSecurity = async () => {
     setSecurityLoading(true);
+    const cacheKey = buildCacheKey("admin", "security");
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setSecurityEvents(cached.events || []);
+      setBannedIps(cached.bannedIps || []);
+      setRateLimits(cached.rateLimits || []);
+      setSecurityLoading(false);
+      return;
+    }
     const [eventsRes, bannedRes, rateRes] = await Promise.all([
       getSecurityEvents(40),
       getBannedIps(40),
@@ -167,6 +231,11 @@ export default function Admin() {
     setSecurityEvents(eventsRes.data || []);
     setBannedIps(bannedRes.data || []);
     setRateLimits(rateRes.data || []);
+    setCache(cacheKey, {
+      events: eventsRes.data || [],
+      bannedIps: bannedRes.data || [],
+      rateLimits: rateRes.data || [],
+    });
     setSecurityLoading(false);
   };
 

@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { searchPosts, searchAuthors } from '../lib/api';
 import PostCard from '../components/posts/PostCard';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Search.css';
 
 export default function Search() {
@@ -19,6 +20,14 @@ export default function Search() {
   }, [query]);
 
   const doSearch = async (q) => {
+    const cacheKey = buildCacheKey("search", q.toLowerCase());
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setPosts(cached.posts || []);
+      setAuthors(cached.authors || []);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const [postsRes, authorsRes] = await Promise.all([
       searchPosts(q),
@@ -26,6 +35,7 @@ export default function Search() {
     ]);
     setPosts(postsRes.data || []);
     setAuthors(authorsRes.data || []);
+    setCache(cacheKey, { posts: postsRes.data || [], authors: authorsRes.data || [] });
     setLoading(false);
   };
 

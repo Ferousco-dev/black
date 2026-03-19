@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Discovery.css';
 
 export default function Discovery() {
@@ -18,6 +19,15 @@ export default function Discovery() {
 
   async function load() {
     setLoading(true);
+    const cacheKey = buildCacheKey("discover", "home");
+    const cached = getCache(cacheKey);
+    if (cached && (cached.trending || []).length > 0) {
+      setTopics(cached.topics || []);
+      setTrending(cached.trending || []);
+      setFeatured(cached.featured || []);
+      setLoading(false);
+      return;
+    }
     const [topicsRes, trendingRes, featuredRes] = await Promise.all([
       supabase.from('topics').select('*').order('post_count', { ascending: false }).limit(12),
       supabase.from('posts_with_stats').select('*').eq('is_published', true).order('view_count', { ascending: false }).limit(20),
@@ -26,18 +36,35 @@ export default function Discovery() {
     setTopics(topicsRes.data || []);
     setTrending(trendingRes.data || []);
     setFeatured(featuredRes.data?.map(f => f.profile) || []);
+    const payload = {
+      topics: topicsRes.data || [],
+      trending: trendingRes.data || [],
+      featured: featuredRes.data?.map(f => f.profile) || [],
+    };
+    if (payload.trending.length > 0) {
+      setCache(cacheKey, payload);
+    }
     setLoading(false);
   }
 
   async function handleSearch(q) {
     setSearch(q);
     if (!q.trim()) { setSearchResults(null); return; }
+    const cacheKey = buildCacheKey("discover", "search", q.toLowerCase());
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setSearchResults(cached);
+      setSearching(false);
+      return;
+    }
     setSearching(true);
     const [postsRes, authorsRes] = await Promise.all([
       supabase.from('posts_with_stats').select('*').eq('is_published', true).or(`title.ilike.%${q}%,subtitle.ilike.%${q}%`).limit(10),
       supabase.from('profiles').select('*').or(`username.ilike.%${q}%,full_name.ilike.%${q}%,publication_name.ilike.%${q}%`).limit(6),
     ]);
-    setSearchResults({ posts: postsRes.data || [], authors: authorsRes.data || [] });
+    const payload = { posts: postsRes.data || [], authors: authorsRes.data || [] };
+    setSearchResults(payload);
+    setCache(cacheKey, payload);
     setSearching(false);
   }
 

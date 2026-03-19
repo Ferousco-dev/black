@@ -13,6 +13,7 @@ import PostCard from '../components/posts/PostCard';
 import { randomGradient } from '../utils/randomGradient';
 import toast from 'react-hot-toast';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './PostView.css';
 
 export default function PostView() {
@@ -81,11 +82,21 @@ export default function PostView() {
   }, [post]);
 
   const loadPost = async () => {
+    const cacheKey = buildCacheKey("post", slug);
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setPost(cached);
+      setLikeCount(cached.like_count || 0);
+      setPdfViewerUrl(await resolvePdfUrl(cached.pdf_url));
+      setLoading(false);
+      return;
+    }
     const { data, error } = await getPost(slug);
     if (error || !data) { toast.error('Post not found'); navigate('/'); return; }
     setPost(data);
     setLikeCount(data.like_count || 0);
     setPdfViewerUrl(await resolvePdfUrl(data.pdf_url));
+    setCache(cacheKey, data);
     setLoading(false);
   };
 
@@ -259,6 +270,13 @@ export default function PostView() {
   };
 
   const loadRelated = async () => {
+    const cacheKey = buildCacheKey("post", post.id, "related");
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setPostTopics(cached.topics || []);
+      setRelatedPosts(cached.related || []);
+      return;
+    }
     const topicsRes = await getPostTopics(post.id);
     const topics = (topicsRes.data || []).map((item) => item.topic).filter(Boolean);
     setPostTopics(topics);
@@ -273,7 +291,9 @@ export default function PostView() {
     });
 
     const items = Array.from(merged.values()).filter((item) => item?.id && item.id !== post.id);
-    setRelatedPosts(items.slice(0, 4));
+    const related = items.slice(0, 4);
+    setRelatedPosts(related);
+    setCache(cacheKey, { topics, related });
   };
 
   if (loading) return <LoadingPage variant="detail" />;

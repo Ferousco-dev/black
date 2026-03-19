@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import LoadingPage from '../components/ui/LoadingPage';
+import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Analytics.css';
 
 function fmt(n) { return (n||0).toLocaleString(); }
@@ -24,6 +25,17 @@ export default function Analytics() {
 
   async function load() {
     setLoading(true);
+    const cacheKey = buildCacheKey("analytics", user.id, range);
+    const cached = getCache(cacheKey);
+    if (cached) {
+      setPosts(cached.posts || []);
+      setAnalytics(cached.analytics || []);
+      setSubscribers(cached.subscribers || { free: 0, paid: 0 });
+      setMrr(cached.mrr || 0);
+      setTips(cached.tips || 0);
+      setLoading(false);
+      return;
+    }
     const since = new Date(Date.now() - range * 86400000).toISOString();
 
     const [postsRes, analyticsRes, paidRes, freeRes, tipsRes, mrrRes] = await Promise.all([
@@ -41,13 +53,24 @@ export default function Analytics() {
     const tipTotal = (tipsRes.data || []).reduce((s, t) => s + t.amount_cents, 0);
     setTips(tipTotal);
 
+    let analyticsData = [];
     // Load analytics for these posts
     if (postsRes.data?.length) {
       const ids = postsRes.data.map(p => p.id);
       const { data: an } = await supabase.from('post_analytics').select('*').in('post_id', ids).gte('date', since.split('T')[0]).order('date');
-      setAnalytics(an || []);
+      analyticsData = an || [];
+      setAnalytics(analyticsData);
+    } else {
+      setAnalytics([]);
     }
 
+    setCache(cacheKey, {
+      posts: postsRes.data || [],
+      analytics: analyticsData,
+      subscribers: { free: freeRes.count || 0, paid: paidRes.count || 0 },
+      mrr: mrrRes.data || 0,
+      tips: tipTotal,
+    });
     setLoading(false);
   }
 
