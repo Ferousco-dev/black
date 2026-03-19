@@ -714,7 +714,7 @@ export const uploadPostPDF = async (file) => {
   const fileName = `${Date.now()}-${file.name}`;
   const { error } = await supabase.storage
     .from("post-pdfs")
-    .upload(fileName, file);
+    .upload(fileName, file, { contentType: "application/pdf" });
   if (error) return { data: null, error };
   const { data } = supabase.storage.from("post-pdfs").getPublicUrl(fileName);
   return { data: data.publicUrl, error: null };

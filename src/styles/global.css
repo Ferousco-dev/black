@@ -235,6 +235,46 @@ h4, h5, h6 { font-family: var(--font-sans); font-weight: 600; }
   align-items: center;
   justify-content: center;
 }
+.loading-page.skeleton-page {
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 16px;
+  flex-direction: column;
+  padding: 12px 0;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border-light) 25%,
+    var(--off-white) 37%,
+    var(--border-light) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  border-radius: 10px;
+}
+.skeleton-line { height: 12px; }
+.skeleton-rect { width: 100%; }
+.skeleton-avatar { width: 36px; height: 36px; border-radius: 50%; }
+.skeleton-pill { height: 28px; border-radius: 999px; }
+.skeleton-card {
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.skeleton-row { display: flex; align-items: center; gap: 12px; }
+.skeleton-col { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
 
 /* EMPTY STATE */
 .empty-state {

@@ -17,6 +17,7 @@ import { useAuth } from "../hooks/useAuth";
 import PostCard from "../components/posts/PostCard";
 import ProfileStatsCard from "../components/share/ProfileStatsCard";
 import toast from "react-hot-toast";
+import LoadingPage from "../components/ui/LoadingPage";
 import "./Profile.css";
 
 export default function Profile() {
@@ -234,11 +235,7 @@ export default function Profile() {
   };
 
   if (loading)
-    return (
-      <div className="loading-page">
-        <span className="spinner" style={{ width: 32, height: 32 }} />
-      </div>
-    );
+    return <LoadingPage variant="detail" />;
   if (!profile)
     return (
       <div

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getProfileByUsername, getFollowers, getFollowing } from '../lib/api';
+import LoadingPage from '../components/ui/LoadingPage';
 import './FollowList.css';
 
 export default function FollowList() {
@@ -41,7 +42,7 @@ export default function FollowList() {
         </div>
 
         {loading ? (
-          <div className="loading-page"><span className="spinner" style={{ width: 28, height: 28 }} /></div>
+          <LoadingPage variant="list" />
         ) : users.length === 0 ? (
           <div className="empty-state">
             <h3>No {type} yet</h3>

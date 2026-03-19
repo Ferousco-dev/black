@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getTopicBySlug, getPostsByTopic } from '../lib/api';
 import PostCard from '../components/posts/PostCard';
+import LoadingPage from '../components/ui/LoadingPage';
 import './TopicHub.css';
 
 export default function TopicHub() {
@@ -53,9 +54,7 @@ export default function TopicHub() {
 
   if (loading) {
     return (
-      <div className="loading-page">
-        <span className="spinner" style={{ width: 32, height: 32 }} />
-      </div>
+      <LoadingPage variant="feed" />
     );
   }
 

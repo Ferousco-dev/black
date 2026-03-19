@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
+import LoadingPage from '../components/ui/LoadingPage';
 import './Discovery.css';
 
 export default function Discovery() {
@@ -11,10 +12,12 @@ export default function Discovery() {
   const [searchResults, setSearchResults] = useState(null);
   const [searching, setSearching] = useState(false);
   const [activeFilter, setActiveFilter] = useState('trending');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { load(); }, []);
 
   async function load() {
+    setLoading(true);
     const [topicsRes, trendingRes, featuredRes] = await Promise.all([
       supabase.from('topics').select('*').order('post_count', { ascending: false }).limit(12),
       supabase.from('posts_with_stats').select('*').eq('is_published', true).order('view_count', { ascending: false }).limit(20),
@@ -23,6 +26,7 @@ export default function Discovery() {
     setTopics(topicsRes.data || []);
     setTrending(trendingRes.data || []);
     setFeatured(featuredRes.data?.map(f => f.profile) || []);
+    setLoading(false);
   }
 
   async function handleSearch(q) {
@@ -51,7 +55,9 @@ export default function Discovery() {
         </div>
       </div>
 
-      {searchResults ? (
+      {loading && !searchResults ? (
+        <LoadingPage variant="feed" />
+      ) : searchResults ? (
         <div className="search-results">
           {searchResults.authors.length > 0 && (
             <section className="results-section">

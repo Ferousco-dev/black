@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { useParams } from 'react-router-dom';
+import LoadingPage from '../components/ui/LoadingPage';
 import './Community.css';
 
 export default function Community() {
@@ -54,7 +55,7 @@ export default function Community() {
     setNewMsg('');
   }
 
-  if (!publisher) return <div className="community-loading">Loading community…</div>;
+  if (!publisher) return <LoadingPage variant="list" count={5} />;
 
   return (
     <div className="community-page">

@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { getUserPublishedPosts, getUserDraftPosts, deletePost, unpublishPost } from '../lib/api';
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
+import LoadingPage from '../components/ui/LoadingPage';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -85,7 +86,7 @@ export default function Dashboard() {
         </div>
 
         {loading ? (
-          <div className="loading-page"><span className="spinner" style={{ width: 28, height: 28 }} /></div>
+          <LoadingPage variant="table" />
         ) : posts.length === 0 ? (
           <div className="empty-state">
             <h3>{tab === 'published' ? 'No published posts' : 'No drafts'}</h3>

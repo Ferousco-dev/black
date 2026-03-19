@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Helmet } from 'react-helmet';
 import { getPost, likePost, unlikePost, checkPostLiked, bookmarkPost, unbookmarkPost, checkBookmarked, checkSubscribed, subscribeToUser, unsubscribeFromUser, upsertReadingHistory, getPostTopics, getPostsByTopic, getPostsByTags } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import Comments from '../components/posts/Comments';
 import Highlights from '../components/posts/Highlights';
@@ -11,6 +12,7 @@ import ShareQuoteCard from '../components/share/ShareQuoteCard';
 import PostCard from '../components/posts/PostCard';
 import { randomGradient } from '../utils/randomGradient';
 import toast from 'react-hot-toast';
+import LoadingPage from '../components/ui/LoadingPage';
 import './PostView.css';
 
 export default function PostView() {
@@ -30,6 +32,7 @@ export default function PostView() {
   const [quoteText, setQuoteText] = useState('');
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [postTopics, setPostTopics] = useState([]);
+  const [pdfViewerUrl, setPdfViewerUrl] = useState('');
   const shareExportRef = useRef(null);
   const contentRef = useRef(null);
   const lastProgressRef = useRef({ value: 0, at: 0 });
@@ -82,7 +85,26 @@ export default function PostView() {
     if (error || !data) { toast.error('Post not found'); navigate('/'); return; }
     setPost(data);
     setLikeCount(data.like_count || 0);
+    setPdfViewerUrl(await resolvePdfUrl(data.pdf_url));
     setLoading(false);
+  };
+
+  const resolvePdfUrl = async (rawUrl) => {
+    if (!rawUrl) return '';
+    try {
+      const url = new URL(rawUrl);
+      const marker = '/post-pdfs/';
+      const idx = url.pathname.indexOf(marker);
+      if (idx === -1) return rawUrl;
+      const filePath = url.pathname.slice(idx + marker.length);
+      const { data, error } = await supabase.storage
+        .from('post-pdfs')
+        .createSignedUrl(filePath, 60 * 60);
+      if (error || !data?.signedUrl) return rawUrl;
+      return data.signedUrl;
+    } catch {
+      return rawUrl;
+    }
   };
 
   const handleLike = async () => {
@@ -254,7 +276,7 @@ export default function PostView() {
     setRelatedPosts(items.slice(0, 4));
   };
 
-  if (loading) return <div className="loading-page"><span className="spinner" style={{ width: 32, height: 32 }} /></div>;
+  if (loading) return <LoadingPage variant="detail" />;
 
   const initials = post.author_full_name
     ? post.author_full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -350,13 +372,22 @@ export default function PostView() {
               </div>
             </div>
             <div className="pdf-viewer">
-              <object data={post.pdf_url} type="application/pdf" className="pdf-frame" aria-label="PDF document">
-                <iframe src={post.pdf_url} title="PDF document" className="pdf-frame" />
+              <object data={pdfViewerUrl || post.pdf_url} type="application/pdf" className="pdf-frame" aria-label="PDF document">
+                <iframe src={pdfViewerUrl || post.pdf_url} title="PDF document" className="pdf-frame" />
               </object>
             </div>
-            <a href={post.pdf_url} target="_blank" rel="noopener noreferrer" className="pdf-open-link">
+            <div className="pdf-actions">
+              <a
+                href={`${(pdfViewerUrl || post.pdf_url)}${(pdfViewerUrl || post.pdf_url).includes('?') ? '&' : '?'}download=1`}
+                className="btn btn-secondary btn-sm"
+                download
+              >
+                Download PDF
+              </a>
+              <a href={pdfViewerUrl || post.pdf_url} target="_blank" rel="noopener noreferrer" className="pdf-open-link">
               Open PDF in new tab
-            </a>
+              </a>
+            </div>
           </div>
         )}
 

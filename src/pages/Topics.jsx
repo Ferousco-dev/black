@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getTopics } from '../lib/api';
+import LoadingPage from '../components/ui/LoadingPage';
 import './Topics.css';
 
 export default function Topics() {
@@ -26,9 +27,7 @@ export default function Topics() {
         </div>
 
         {loading ? (
-          <div className="loading-page">
-            <span className="spinner" style={{ width: 32, height: 32 }} />
-          </div>
+          <LoadingPage variant="grid" />
         ) : topics.length === 0 ? (
           <div className="empty-state">
             <h3>No topics yet</h3>

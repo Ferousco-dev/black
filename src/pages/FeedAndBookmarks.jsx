@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getFeedPosts, getUserBookmarks } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import PostCard from '../components/posts/PostCard';
+import LoadingPage from '../components/ui/LoadingPage';
 
 export function Feed() {
   const { user } = useAuth();
@@ -20,7 +21,7 @@ export function Feed() {
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', marginBottom: 8 }}>Following</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Posts from writers you follow</p>
           {loading ? (
-            <div className="loading-page"><span className="spinner" style={{ width: 28, height: 28 }} /></div>
+            <LoadingPage variant="feed" />
           ) : posts.length === 0 ? (
             <div className="empty-state">
               <h3>Your feed is empty</h3>
@@ -49,7 +50,7 @@ export function Bookmarks() {
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', marginBottom: 8 }}>Bookmarks</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Posts you've saved for later</p>
           {loading ? (
-            <div className="loading-page"><span className="spinner" style={{ width: 28, height: 28 }} /></div>
+            <LoadingPage variant="feed" />
           ) : posts.length === 0 ? (
             <div className="empty-state">
               <h3>No bookmarks yet</h3>

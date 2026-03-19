@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
+import LoadingPage from '../components/ui/LoadingPage';
 import './Analytics.css';
 
 function fmt(n) { return (n||0).toLocaleString(); }
@@ -128,7 +129,7 @@ export default function Analytics() {
       {/* Posts table */}
       <div className="posts-table-card">
         <h3 className="chart-title">Post Performance</h3>
-        {loading ? <div className="loading-row">Loading…</div> : (
+        {loading ? <LoadingPage variant="table" count={6} /> : (
           <table className="perf-table">
             <thead>
               <tr>

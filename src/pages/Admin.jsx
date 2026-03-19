@@ -28,6 +28,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import AdminGrowthCard from "../components/share/AdminGrowthCard";
 import toast from "react-hot-toast";
+import LoadingPage from "../components/ui/LoadingPage";
 import "./Admin.css";
 
 export default function Admin() {
@@ -522,9 +523,7 @@ export default function Admin() {
         </div>
 
         {loading ? (
-          <div className="loading-page">
-            <span className="spinner" style={{ width: 32, height: 32 }} />
-          </div>
+          <LoadingPage variant="table" count={6} />
         ) : (
           <>
             {activeTab === "overview" && stats && (
@@ -551,9 +550,7 @@ export default function Admin() {
             {activeTab === "metrics" && (
               <div className="admin-metrics">
                 {metricsLoading ? (
-                  <div className="loading-page">
-                    <span className="spinner" style={{ width: 28, height: 28 }} />
-                  </div>
+                  <LoadingPage variant="table" count={6} />
                 ) : (
                   <>
                     <div className="admin-metric-grid">
@@ -674,9 +671,7 @@ export default function Admin() {
                 )}
 
                 {usersLoading ? (
-                  <div className="loading-page">
-                    <span className="spinner" style={{ width: 28, height: 28 }} />
-                  </div>
+                  <LoadingPage variant="table" count={6} />
                 ) : (
                   <div className="admin-table">
                     <div className="admin-table-head admin-user-grid">
@@ -752,9 +747,7 @@ export default function Admin() {
                   <span>Likes</span>
                 </div>
                 {postsLoading ? (
-                  <div className="loading-page">
-                    <span className="spinner" style={{ width: 28, height: 28 }} />
-                  </div>
+                  <LoadingPage variant="table" count={6} />
                 ) : (
                   posts.map((post) => (
                     <div key={post.id} className="admin-table-row">
@@ -789,9 +782,7 @@ export default function Admin() {
                   <span>Date</span>
                 </div>
                 {commentsLoading ? (
-                  <div className="loading-page">
-                    <span className="spinner" style={{ width: 28, height: 28 }} />
-                  </div>
+                  <LoadingPage variant="table" count={6} />
                 ) : (
                   comments.map((comment) => (
                     <div key={comment.id} className="admin-table-row">
@@ -872,11 +863,9 @@ export default function Admin() {
                     <h3>Recent broadcasts</h3>
                     <span>Last 20 sends</span>
                   </div>
-                  {broadcastLoading ? (
-                    <div className="loading-page">
-                      <span className="spinner" style={{ width: 28, height: 28 }} />
-                    </div>
-                  ) : (
+                {broadcastLoading ? (
+                  <LoadingPage variant="list" count={4} />
+                ) : (
                     <div className="admin-broadcast-list">
                       {broadcasts.map((item) => (
                         <div key={item.id} className="admin-broadcast-item">
@@ -1000,9 +989,7 @@ export default function Admin() {
                     <span>Most recent activity</span>
                   </div>
                   {securityLoading ? (
-                    <div className="loading-page">
-                      <span className="spinner" style={{ width: 28, height: 28 }} />
-                    </div>
+                    <LoadingPage variant="list" count={5} />
                   ) : (
                     <div className="admin-event-list">
                       {securityEvents.map((event) => (
@@ -1159,9 +1146,7 @@ export default function Admin() {
             </div>
 
             {userHistoryLoading ? (
-              <div className="loading-page">
-                <span className="spinner" style={{ width: 28, height: 28 }} />
-              </div>
+              <LoadingPage variant="list" count={4} />
             ) : (
               <div className="admin-drawer-body">
                 <div className="admin-drawer-section">

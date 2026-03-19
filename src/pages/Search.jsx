@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { searchPosts, searchAuthors } from '../lib/api';
 import PostCard from '../components/posts/PostCard';
+import LoadingPage from '../components/ui/LoadingPage';
 import './Search.css';
 
 export default function Search() {
@@ -64,7 +65,7 @@ export default function Search() {
             </div>
 
             {loading ? (
-              <div className="loading-page"><span className="spinner" style={{ width: 28, height: 28 }} /></div>
+              <LoadingPage variant={tab === 'authors' ? 'list' : 'feed'} />
             ) : tab === 'posts' ? (
               posts.length === 0 ? (
                 <div className="empty-state"><h3>No posts found</h3><p>Try different keywords.</p></div>

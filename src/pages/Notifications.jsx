@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
+import LoadingPage from '../components/ui/LoadingPage';
 import './Notifications.css';
 
 const icons = {
@@ -86,7 +87,7 @@ export default function Notifications() {
         </div>
 
         {loading ? (
-          <div className="loading-page"><span className="spinner" style={{ width: 28, height: 28 }} /></div>
+          <LoadingPage variant="list" />
         ) : notifications.length === 0 ? (
           <div className="empty-state">
             <h3>No notifications yet</h3>

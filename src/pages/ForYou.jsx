@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getForYouFeed } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 import PostCard from "../components/posts/PostCard";
+import LoadingPage from "../components/ui/LoadingPage";
 import "./ForYou.css";
 
 export default function ForYou() {
@@ -61,9 +62,7 @@ export default function ForYou() {
         </div>
 
         {loading && posts.length === 0 ? (
-          <div className="loading-page">
-            <span className="spinner" style={{ width: 32, height: 32 }} />
-          </div>
+          <LoadingPage variant="feed" />
         ) : posts.length === 0 ? (
           <div className="empty-state">
             <h3>No recommendations yet</h3>

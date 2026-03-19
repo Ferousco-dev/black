@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getPosts, getResumeReading } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 import PostCard from "../components/posts/PostCard";
+import LoadingPage from "../components/ui/LoadingPage";
 import "./Home.css";
 
 export default function Home() {
@@ -75,9 +76,7 @@ export default function Home() {
             )}
 
             {loading && posts.length === 0 ? (
-              <div className="loading-page">
-                <span className="spinner" style={{ width: 32, height: 32 }} />
-              </div>
+              <LoadingPage variant="feed" />
             ) : posts.length === 0 ? (
               <div className="empty-state">
                 <h3>No posts yet</h3>
