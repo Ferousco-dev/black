@@ -49,6 +49,14 @@ export default function Editor() {
     if (isEditing) loadPost();
   }, [id]);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setShowSettings(false);
+    };
+    if (showSettings) window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showSettings]);
+
   // Auto-save every 30s
   useEffect(() => {
     if (!autoSaveEnabled) return;
@@ -245,8 +253,21 @@ export default function Editor() {
 
         {/* Settings panel */}
         {showSettings && (
-          <div className="editor-settings-panel">
-            <h3 className="settings-panel-title">Post Settings</h3>
+          <div className="editor-settings-overlay">
+            <div className="editor-settings-backdrop" onClick={() => setShowSettings(false)} />
+            <div className="editor-settings-panel">
+              <div className="editor-settings-header">
+                <h3 className="settings-panel-title">Post Settings</h3>
+                <button
+                  className="icon-btn"
+                  onClick={() => setShowSettings(false)}
+                  aria-label="Close settings"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
 
             <div className="setting-group">
               <label className="setting-label">Audience</label>
@@ -304,6 +325,7 @@ export default function Editor() {
                 </div>
               </div>
             )}
+            </div>
           </div>
         )}
       </div>

@@ -1,31 +1,56 @@
-.editor-page { min-height: 100vh; background: var(--bg-color); }
+.editor-page {
+  min-height: 100vh;
+  background: var(--off-white);
+}
+.editor-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(800px 300px at 10% -10%, rgba(15, 23, 42, 0.06), transparent 60%),
+    radial-gradient(600px 260px at 90% -10%, rgba(15, 23, 42, 0.05), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+.editor-page > * { position: relative; z-index: 1; }
 .editor-topbar {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255,255,255,0.97);
+  background: var(--bg-color);
   border-bottom: 1px solid var(--border-light);
-  padding: 0 24px;
-  height: 52px;
+  padding: 0 28px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .editor-topbar-right { display: flex; align-items: center; gap: 10px; }
 .save-status { font-size: 0.775rem; color: var(--text-muted); }
-.editor-container { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+.editor-container {
+  max-width: 760px;
+  margin: 32px auto 0;
+  padding: 44px 52px 96px;
+  background: var(--bg-color);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
 .editor-meta { margin-bottom: 0; }
 .cover-upload { margin-bottom: 24px; }
 .cover-upload-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.875rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 8px 14px;
-  border: 1.5px dashed var(--border);
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
   transition: all 0.15s;
 }
 .cover-upload-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-pale); }
@@ -48,11 +73,11 @@
   border: none;
   outline: none;
   font-family: var(--font-serif);
-  font-size: 2.25rem;
+  font-size: 2.4rem;
   font-weight: 700;
   color: var(--text-primary);
   padding: 0;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   background: transparent;
   line-height: 1.25;
 }
@@ -62,16 +87,16 @@
   border: none;
   outline: none;
   font-family: var(--font-sans);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   color: var(--text-secondary);
   padding: 0;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
   background: transparent;
   font-weight: 400;
 }
 .editor-subtitle::placeholder { color: var(--border); }
-.editor-divider { border: none; border-top: 1px solid var(--border-light); margin-bottom: 0; }
-.editor-extras { margin-top: 32px; border-top: 1px solid var(--border-light); padding-top: 28px; display: flex; flex-direction: column; gap: 24px; }
+.editor-divider { border: none; border-top: 1px solid var(--border-light); margin: 10px 0 0; }
+.editor-extras { margin-top: 28px; border-top: 1px solid var(--border-light); padding-top: 24px; display: flex; flex-direction: column; gap: 24px; }
 .editor-extra-section { }
 .extra-label { font-size: 0.825rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 10px; }
 .pdf-attached {
@@ -90,18 +115,21 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.875rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 8px 14px;
-  border: 1.5px dashed var(--border);
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
   transition: all 0.15s;
 }
 .pdf-upload-btn:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-pale); }
 
 /* ── Editor layout with settings panel ───────────────────── */
-.editor-layout { display: flex; min-height: calc(100vh - 52px); }
+.editor-layout { display: flex; min-height: calc(100vh - 56px); justify-content: center; }
 .editor-main { flex: 1; min-width: 0; }
 .editor-topbar-center { display: flex; align-items: center; gap: 12px; position: absolute; left: 50%; transform: translateX(-50%); }
 .editor-stats { font-size: 0.78rem; color: var(--text-muted); }
@@ -128,16 +156,44 @@
   .editor-topbar-center {
     display: none;
   }
+  .editor-container {
+    margin-top: 16px;
+    padding: 28px 20px 72px;
+    border-radius: 12px;
+  }
 }
 
 /* ── Settings panel ───────────────────────────────────────── */
+.editor-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+}
+.editor-settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 18, 0.4);
+  backdrop-filter: blur(4px);
+}
 .editor-settings-panel {
-  width: 280px; flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(280px, 84vw);
   border-left: 1px solid var(--border-light);
-  padding: 28px 20px;
-  background: var(--off-white);
+  padding: 20px 20px 28px;
+  background: var(--bg-color);
   overflow-y: auto;
   animation: slideIn 0.2s ease;
+  box-shadow: var(--shadow-lg);
+}
+.editor-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 @keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
 .settings-panel-title { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 24px; }
