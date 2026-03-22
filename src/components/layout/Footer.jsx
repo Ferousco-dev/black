@@ -10,19 +10,42 @@ export default function Footer() {
             <span className="logo-mark">●</span>
             <span className="logo-text">Chronicles</span>
           </Link>
-          <p className="footer-tagline">A platform for serious writing.</p>
+          <p className="footer-tagline">Ideas worth following, writing worth keeping.</p>
+          <div className="footer-cta">
+            <Link to="/topics" className="footer-pill">
+              Explore Topics
+            </Link>
+            <Link to="/signup" className="footer-pill footer-pill-primary">
+              Start Writing
+            </Link>
+          </div>
         </div>
         <div className="footer-links">
           <div className="footer-col">
-            <div className="footer-col-title">Platform</div>
+            <div className="footer-col-title">Discover</div>
             <Link to="/" className="footer-link">
-              Discover
+              Home
             </Link>
             <Link to="/search" className="footer-link">
               Search
             </Link>
-            <Link to="/signup" className="footer-link">
-              Start writing
+            <Link to="/topics" className="footer-link">
+              Topics
+            </Link>
+            <Link to="/for-you" className="footer-link">
+              For You
+            </Link>
+          </div>
+          <div className="footer-col">
+            <div className="footer-col-title">Community</div>
+            <Link to="/community" className="footer-link">
+              Discussions
+            </Link>
+            <Link to="/feed" className="footer-link">
+              Following Feed
+            </Link>
+            <Link to="/bookmarks" className="footer-link">
+              Bookmarks
             </Link>
           </div>
           <div className="footer-col">
@@ -40,10 +63,9 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <div className="container-wide">
-          <span>
-            © {new Date().getFullYear()} Chronicles. All rights reserved.
-          </span>
+        <div className="container-wide footer-bottom-inner">
+          <span>© {new Date().getFullYear()} Chronicles</span>
+          <span className="footer-bottom-note">Built for readers and writers.</span>
         </div>
       </div>
     </footer>
