@@ -67,16 +67,21 @@
   color: var(--text-secondary);
   transition: all 0.15s;
 }
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+}
 .icon-btn:hover {
   background: var(--navy-pale);
   color: var(--navy);
 }
 .theme-toggle {
-  border: 1px solid var(--border-light);
-  background: var(--white);
+  border: 1px solid var(--border);
+  background: var(--off-white);
 }
 .theme-toggle:hover {
-  background: var(--navy-pale);
+  background: var(--border-light);
+  color: var(--navy);
 }
 .resume-dropdown-wrapper { position: relative; }
 .resume-dropdown {
@@ -580,7 +585,7 @@
   .navbar-center,
   .navbar-right .btn,
   .navbar-right .search-wrapper,
-  .navbar-right .notification-bell-wrapper,
+  .navbar-right .notif-bell-wrapper,
   .user-menu-wrapper {
     display: none;
   }

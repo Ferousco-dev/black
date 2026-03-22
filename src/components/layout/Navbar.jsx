@@ -8,7 +8,7 @@ import {
   listenToSystemTheme,
   applyTheme,
 } from "../../theme";
-import { signOut, getResumeReading } from "../../lib/api";
+import { signOut } from "../../lib/api";
 import NotificationBell from "./NotificationBell";
 import toast from "react-hot-toast";
 import "./Navbar.css";
@@ -23,12 +23,9 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [theme, setTheme] = useState(getTheme());
-  const [resumeOpen, setResumeOpen] = useState(false);
-  const [resumeItems, setResumeItems] = useState([]);
   const [bottomHidden, setBottomHidden] = useState(false);
   const menuRef = useRef(null);
   const searchRef = useRef(null);
-  const resumeRef = useRef(null);
   const lastScrollYRef = useRef(0);
 
   useEffect(() => {
@@ -41,8 +38,6 @@ export default function Navbar() {
         setMenuOpen(false);
       if (searchRef.current && !searchRef.current.contains(e.target))
         setSearchOpen(false);
-      if (resumeRef.current && !resumeRef.current.contains(e.target))
-        setResumeOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -102,16 +97,6 @@ export default function Navbar() {
 
   const handleThemeToggle = () => {
     setTheme(toggleTheme());
-  };
-
-  const handleResumeOpen = async () => {
-    if (!user) return;
-    const next = !resumeOpen;
-    setResumeOpen(next);
-    if (next) {
-      const { data } = await getResumeReading(user.id, 5);
-      setResumeItems((data || []).map((item) => ({ ...item, post: item.post })));
-    }
   };
 
   const profilePath = user ? `/@${profile?.username}` : "/signin";
@@ -248,44 +233,6 @@ export default function Navbar() {
                   Admin
                 </Link>
               )}
-              <div className="resume-dropdown-wrapper" ref={resumeRef}>
-                <button className="icon-btn" onClick={handleResumeOpen} aria-label="Resume reading">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 4h16v16H4z" />
-                    <path d="M8 4v16M16 8v8" />
-                  </svg>
-                </button>
-                {resumeOpen && (
-                  <div className="resume-dropdown">
-                    <div className="resume-dropdown-header">
-                      <span>Resume reading</span>
-                      <Link to="/" className="resume-see-all" onClick={() => setResumeOpen(false)}>
-                        Home
-                      </Link>
-                    </div>
-                    {resumeItems.length === 0 ? (
-                      <div className="resume-empty">No recent reads</div>
-                    ) : (
-                      resumeItems.map((item) => (
-                        <Link
-                          key={item.post?.id}
-                          to={`/p/${item.post?.slug}`}
-                          className="resume-item"
-                          onClick={() => setResumeOpen(false)}
-                        >
-                          <div className="resume-item-title">{item.post?.title}</div>
-                          <div className="resume-item-meta">
-                            @{item.post?.author_username} · {item.progress || 0}% read
-                          </div>
-                          <div className="resume-item-bar">
-                            <span style={{ width: `${item.progress || 0}%` }} />
-                          </div>
-                        </Link>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
               <NotificationBell />
               <Link
                 to="/dashboard/new"
@@ -553,6 +500,21 @@ export default function Navbar() {
               {/* Content Section */}
               <div className="mobile-menu-section">
                 <div className="mobile-section-title">Content</div>
+                <Link to="/resume-reading" className="mobile-link-item">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M5 4h11l3 3v13H5z" />
+                    <path d="M16 4v3h3" />
+                    <path d="M8 12h8M8 16h8" />
+                  </svg>
+                  <span>Resume Reading</span>
+                </Link>
                 <Link to="/dashboard" className="mobile-link-item">
                   <svg
                     width="20"
@@ -770,21 +732,26 @@ export default function Navbar() {
           <span>New</span>
         </Link>
         <Link
-          to={user ? "/feed" : "/signin"}
-          className={`mobile-bottom-link${location.pathname === "/feed" ? " active" : ""}`}
-          aria-label="Feed"
+          to={user ? "/notifications" : "/signin"}
+          className={`mobile-bottom-link${location.pathname === "/notifications" ? " active" : ""}`}
+          aria-label="Notifications"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
-              d="M4 5h16v14H4z"
+              d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
             />
-            <path d="M8 9h8M8 13h8" fill="none" stroke="currentColor" strokeWidth="2" />
+            <path
+              d="M13.73 21a2 2 0 0 1-3.46 0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
           </svg>
           {unreadCount > 0 && <span className="nav-badge" aria-hidden="true" />}
-          <span>Feed</span>
+          <span>Notifications</span>
         </Link>
         <Link
           to={profilePath}

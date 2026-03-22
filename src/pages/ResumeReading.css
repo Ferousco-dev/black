@@ -1,0 +1,88 @@
+.resume-reading-page {
+  padding: 2.5rem 0 4.5rem;
+  min-height: 80vh;
+}
+
+.resume-reading-header {
+  margin-bottom: 20px;
+}
+
+.resume-reading-header h1 {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.resume-reading-header p {
+  color: var(--text-muted);
+}
+
+.resume-reading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.resume-card {
+  display: block;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  background: var(--off-white);
+  transition: all 0.2s ease;
+}
+
+.resume-card:hover {
+  border-color: var(--text-primary);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+.resume-card-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.resume-card-meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.resume-progress {
+  height: 4px;
+  background: var(--border-light);
+  border-radius: 6px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.resume-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px;
+}
+
+@media (max-width: 640px) {
+  .resume-reading-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .resume-card {
+    padding: 10px;
+  }
+
+  .resume-card-title {
+    font-size: 0.95rem;
+  }
+
+  .resume-card-meta {
+    font-size: 0.7rem;
+  }
+}
