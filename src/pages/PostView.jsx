@@ -35,8 +35,12 @@ export default function PostView() {
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [postTopics, setPostTopics] = useState([]);
   const [pdfViewerUrl, setPdfViewerUrl] = useState('');
+  const [compactHeader, setCompactHeader] = useState(false);
+  const [coverTone, setCoverTone] = useState('light');
+  const [pdfOpen, setPdfOpen] = useState(false);
   const shareExportRef = useRef(null);
   const contentRef = useRef(null);
+  const coverRef = useRef(null);
   const lastProgressRef = useRef({ value: 0, at: 0 });
   const lastTapRef = useRef(0);
 
@@ -51,6 +55,54 @@ export default function PostView() {
       checkSubscribed(user.id, post.author_id).then(({ subscribed }) => setSubscribed(subscribed));
     }
   }, [post, user]);
+
+  useEffect(() => {
+    if (!post?.cover_image_url || !coverRef.current) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setCompactHeader(!entry.isIntersecting);
+      },
+      { rootMargin: "-80px 0px 0px 0px", threshold: 0.2 }
+    );
+    observer.observe(coverRef.current);
+    return () => observer.disconnect();
+  }, [post?.cover_image_url]);
+
+  useEffect(() => {
+    if (!post?.cover_image_url) return;
+    let isMounted = true;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = post.cover_image_url;
+    img.onload = () => {
+      if (!isMounted) return;
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const size = 32;
+        canvas.width = size;
+        canvas.height = size;
+        ctx.drawImage(img, 0, 0, size, size);
+        const { data } = ctx.getImageData(0, 0, size, size);
+        let total = 0;
+        const pixels = data.length / 4;
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          total += 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        }
+        const avg = total / pixels;
+        setCoverTone(avg < 140 ? "dark" : "light");
+      } catch {
+        setCoverTone("light");
+      }
+    };
+    img.onerror = () => {
+      if (isMounted) setCoverTone("light");
+    };
+    return () => { isMounted = false; };
+  }, [post?.cover_image_url]);
 
   useEffect(() => {
     if (!shareOpen) return undefined;
@@ -329,6 +381,19 @@ export default function PostView() {
         <meta name="twitter:description" content={seoDescription} />
         <meta name="twitter:image" content={ogImage} />
       </Helmet>
+      {post.cover_image_url && (
+        <div className={`post-view-sticky ${compactHeader ? "visible" : ""}`}>
+          <div className="post-view-sticky-inner">
+            <img
+              src={post.cover_image_url}
+              alt=""
+              className="post-view-sticky-thumb"
+              aria-hidden="true"
+            />
+            <div className="post-view-sticky-title">{post.title}</div>
+          </div>
+        </div>
+      )}
       <div className="container-narrow">
         {/* Author header */}
         <div className="post-view-author">
@@ -355,21 +420,26 @@ export default function PostView() {
           )}
         </div>
 
-        {/* Post header */}
-        <header className="post-view-header">
-          <h1 className="post-view-title">{post.title}</h1>
-          {post.subtitle && <p className="post-view-subtitle">{post.subtitle}</p>}
-        </header>
-
         {/* Cover image */}
         {post.cover_image_url && (
           <div
-            className="post-view-cover"
+            className={`post-view-cover cover-${coverTone}`}
+            ref={coverRef}
             onDoubleClick={handleDoubleTapLike}
             onTouchEnd={handleTouchLike}
           >
             <img src={post.cover_image_url} alt={post.title} />
+            <div className="post-view-cover-title">
+              <h1>{post.title}</h1>
+              {post.subtitle && <p>{post.subtitle}</p>}
+            </div>
           </div>
+        )}
+        {!post.cover_image_url && (
+          <header className="post-view-header">
+            <h1 className="post-view-title">{post.title}</h1>
+            {post.subtitle && <p className="post-view-subtitle">{post.subtitle}</p>}
+          </header>
         )}
 
         {/* Content */}
@@ -395,12 +465,10 @@ export default function PostView() {
                 <div className="pdf-label">PDF Document</div>
               </div>
             </div>
-            <div className="pdf-viewer">
-              <object data={pdfViewerUrl || post.pdf_url} type="application/pdf" className="pdf-frame" aria-label="PDF document">
-                <iframe src={pdfViewerUrl || post.pdf_url} title="PDF document" className="pdf-frame" />
-              </object>
-            </div>
             <div className="pdf-actions">
+              <button className="btn btn-primary btn-sm" onClick={() => setPdfOpen(true)}>
+                Open reader
+              </button>
               <a
                 href={`${(pdfViewerUrl || post.pdf_url)}${(pdfViewerUrl || post.pdf_url).includes('?') ? '&' : '?'}download=1`}
                 className="btn btn-secondary btn-sm"
@@ -582,6 +650,39 @@ export default function PostView() {
                 animate={false}
               />
             )}
+          </div>
+        </div>
+      )}
+      {pdfOpen && (
+        <div className="pdf-modal" role="dialog" aria-modal="true">
+          <div className="pdf-modal-backdrop" onClick={() => setPdfOpen(false)} />
+          <div className="pdf-modal-panel">
+            <div className="pdf-modal-header">
+              <div>
+                <h3>{post.pdf_filename || 'PDF Reader'}</h3>
+                <p>Scroll to read. Use the actions to download or open in a new tab.</p>
+              </div>
+              <button className="icon-btn" onClick={() => setPdfOpen(false)} aria-label="Close reader">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div className="pdf-modal-body">
+              <object data={pdfViewerUrl || post.pdf_url} type="application/pdf" className="pdf-modal-frame" aria-label="PDF document">
+                <iframe src={pdfViewerUrl || post.pdf_url} title="PDF document" className="pdf-modal-frame" />
+              </object>
+            </div>
+            <div className="pdf-modal-actions">
+              <a
+                href={`${(pdfViewerUrl || post.pdf_url)}${(pdfViewerUrl || post.pdf_url).includes('?') ? '&' : '?'}download=1`}
+                className="btn btn-secondary btn-sm"
+                download
+              >
+                Download PDF
+              </a>
+              <a href={pdfViewerUrl || post.pdf_url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+                Open in new tab
+              </a>
+            </div>
           </div>
         </div>
       )}
