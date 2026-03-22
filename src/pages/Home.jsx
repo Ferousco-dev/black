@@ -74,10 +74,25 @@ export default function Home() {
       <div className="container">
         <div className="home-layout">
           <main className="home-main">
-            <div className="home-header">
-              <h1 className="home-title">Latest Posts</h1>
-              <p className="home-subtitle">Thoughtful writing from people worth following.</p>
-            </div>
+            <section className="home-hero">
+              <div className="home-hero-copy">
+                <span className="home-hero-eyebrow">Discover</span>
+                <h1 className="home-title">Ideas worth following.</h1>
+                <p className="home-subtitle">
+                  Thoughtful writing from people worth following.
+                </p>
+              </div>
+              {!user && (
+                <div className="home-hero-actions">
+                  <a href="/signup" className="btn btn-primary">
+                    Start writing
+                  </a>
+                  <a href="/signin" className="btn btn-secondary">
+                    Sign in
+                  </a>
+                </div>
+              )}
+            </section>
 
             {user && resumeItems.length > 0 && (
               <section className="resume-shelf">
@@ -85,7 +100,10 @@ export default function Home() {
                   <h2>Resume reading</h2>
                   <span>Most recent</span>
                 </div>
-                <a href={`/p/${resumeItems[0]?.post?.slug}`} className="resume-card resume-card-single">
+                <a
+                  href={`/p/${resumeItems[0]?.post?.slug}`}
+                  className="resume-card resume-card-single"
+                >
                   <div className="resume-card-title">{resumeItems[0]?.post?.title}</div>
                   <div className="resume-card-meta">
                     <span>@{resumeItems[0]?.post?.author_username}</span>
@@ -108,6 +126,10 @@ export default function Home() {
               </div>
             ) : (
               <>
+                <div className="home-section-header">
+                  <h2>Latest posts</h2>
+                  <span>Fresh perspectives, daily</span>
+                </div>
                 <div className="posts-list">
                   {posts.map((post) => (
                     <PostCard key={post.id} post={post} />
@@ -136,7 +158,7 @@ export default function Home() {
           </main>
 
           <aside className="home-sidebar">
-            <div className="sidebar-section">
+            <div className="sidebar-section sidebar-card">
               <h3 className="sidebar-title">About Chronicles</h3>
               <p className="sidebar-text">
                 A platform for serious writers and thoughtful readers. Publish
@@ -144,7 +166,7 @@ export default function Home() {
               </p>
             </div>
             <div className="sidebar-divider" />
-            <div className="sidebar-section">
+            <div className="sidebar-section sidebar-card">
               <h3 className="sidebar-title">Get started</h3>
               <div className="sidebar-actions">
                 <a

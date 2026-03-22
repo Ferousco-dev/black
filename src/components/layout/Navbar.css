@@ -78,6 +78,8 @@
 .theme-toggle {
   border: 1px solid var(--border);
   background: var(--off-white);
+  width: 30px;
+  height: 30px;
 }
 .theme-toggle:hover {
   background: var(--border-light);
