@@ -65,7 +65,17 @@ export default function Footer() {
       <div className="footer-bottom">
         <div className="container-wide footer-bottom-inner">
           <span>© {new Date().getFullYear()} Chronicles</span>
-          <span className="footer-bottom-note">Built for readers and writers.</span>
+          <span className="footer-bottom-note">
+            Powered by{" "}
+            <a
+              className="footer-dev-link"
+              href="https://www.linkedin.com/in/oluwaferanmi-oresajo"
+              target="_blank"
+              rel="noreferrer"
+            >
+              FERANMI
+            </a>
+          </span>
         </div>
       </div>
     </footer>
