@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import PostCard from '../components/posts/PostCard';
 import LoadingPage from '../components/ui/LoadingPage';
 import { buildCacheKey, getCache, setCache } from '../lib/cache';
+import './FeedAndBookmarks.css';
 
 export function Feed() {
   const { user } = useAuth();
@@ -27,11 +28,11 @@ export function Feed() {
   }, [user]);
 
   return (
-    <div style={{ padding: '2.5rem 0 5rem' }}>
+    <div className="feed-page">
       <div className="container">
-        <div style={{ maxWidth: 720 }}>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', marginBottom: 8 }}>Following</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Posts from writers you follow</p>
+        <div className="feed-page-inner">
+          <h1 className="feed-title">Following</h1>
+          <p className="feed-subtitle">Posts from writers you follow</p>
           {loading ? (
             <LoadingPage variant="feed" />
           ) : posts.length === 0 ? (
@@ -67,11 +68,11 @@ export function Bookmarks() {
   }, [user]);
 
   return (
-    <div style={{ padding: '2.5rem 0 5rem' }}>
+    <div className="feed-page">
       <div className="container">
-        <div style={{ maxWidth: 720 }}>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', marginBottom: 8 }}>Bookmarks</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>Posts you've saved for later</p>
+        <div className="feed-page-inner">
+          <h1 className="feed-title">Bookmarks</h1>
+          <p className="feed-subtitle">Posts you've saved for later</p>
           {loading ? (
             <LoadingPage variant="feed" />
           ) : posts.length === 0 ? (

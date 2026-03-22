@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { signOut } from "./lib/api";
@@ -44,8 +43,6 @@ function ProtectedRoute({ children }) {
 function AppLayout() {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const touchStartRef = useRef({ x: 0, y: 0 });
 
   const handleSuspendSignOut = async () => {
     await signOut();
@@ -77,26 +74,7 @@ function AppLayout() {
       }}
     >
       <Navbar />
-      <div
-        style={{ flex: 1, paddingTop: "60px" }}
-        onTouchStart={(event) => {
-          if (!window.matchMedia("(max-width: 768px)").matches) return;
-          if (event.touches.length !== 1) return;
-          const touch = event.touches[0];
-          touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-        }}
-        onTouchEnd={(event) => {
-          if (!window.matchMedia("(max-width: 768px)").matches) return;
-          if (event.changedTouches.length !== 1) return;
-          const touch = event.changedTouches[0];
-          const start = touchStartRef.current;
-          const deltaX = touch.clientX - start.x;
-          const deltaY = touch.clientY - start.y;
-          if (Math.abs(deltaX) < 60 || Math.abs(deltaX) < Math.abs(deltaY)) return;
-          if (location.pathname === "/" && deltaX > 0) navigate("/feed");
-          if (location.pathname === "/feed" && deltaX < 0) navigate("/");
-        }}
-      >
+      <div style={{ flex: 1, paddingTop: "60px" }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/signin" element={<SignIn />} />
