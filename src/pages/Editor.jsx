@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { createPost, updatePost, publishPost, uploadPostImage, uploadPostPDF, supabase } from '../lib/api';
+import { createPost, updatePost, publishPost, uploadPostImage, uploadPostPDF, supabase, notifyPostMentions, getTopics, setPostTopics } from '../lib/api';
 import { supabase as sb } from '../lib/supabase';
 import RichEditor from '../components/editor/RichEditor';
 import toast from 'react-hot-toast';
@@ -17,7 +17,7 @@ function readingTime(words) {
 }
 
 export default function Editor() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = !!id;
@@ -40,6 +40,9 @@ export default function Editor() {
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDesc, setSeoDesc] = useState('');
   const [audience, setAudience] = useState('everyone'); // everyone | paid | free
+  const [topics, setTopics] = useState([]);
+  const [showTopicPicker, setShowTopicPicker] = useState(false);
+  const [topicQuery, setTopicQuery] = useState('');
   const autoSaveTimer = useRef(null);
   const postIdRef = useRef(null);
 
@@ -48,6 +51,14 @@ export default function Editor() {
   useEffect(() => {
     if (isEditing) loadPost();
   }, [id]);
+
+  useEffect(() => {
+    const loadTopics = async () => {
+      const { data } = await getTopics(50);
+      setTopics(data || []);
+    };
+    loadTopics();
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -116,7 +127,29 @@ export default function Editor() {
     return data;
   };
 
-  const getTagsArray = () => tags.split(',').map(t => t.trim()).filter(Boolean);
+  const getTagsArray = () =>
+    tags
+      .split(',')
+      .map((t) => t.trim().replace(/^#/, ''))
+      .filter(Boolean);
+
+  const extractTopicSlugs = (text = "") => {
+    const set = new Set();
+    const regex = /#([a-zA-Z0-9_-]{2,30})/g;
+    let match = null;
+    while ((match = regex.exec(text)) !== null) {
+      set.add(match[1].toLowerCase());
+    }
+    return set;
+  };
+
+  const getTopicIdsFromTags = () => {
+    const slugs = extractTopicSlugs(tags);
+    if (!slugs.size) return [];
+    return topics
+      .filter((t) => slugs.has(t.slug?.toLowerCase()) || slugs.has(t.name?.toLowerCase()))
+      .map((t) => t.id);
+  };
 
   const handleSave = async (silent = false) => {
     if (!title.trim()) { if (!silent) toast.error('Please add a title'); return; }
@@ -160,8 +193,47 @@ export default function Editor() {
     if (!pid) { setPublishing(false); return; }
     const { data, error } = await publishPost(pid);
     if (error) toast.error('Publish failed: ' + error.message);
-    else { toast.success('Published! 🎉'); setIsPublished(true); navigate(`/p/${data.slug}`); }
+    else {
+      const topicIds = getTopicIdsFromTags();
+      if (topicIds.length) {
+        await setPostTopics(pid, topicIds);
+      }
+      if (profile?.is_verified) {
+        notifyPostMentions({
+          actorId: user.id,
+          isVerified: true,
+          post: data,
+          title,
+          subtitle,
+          content,
+        });
+      }
+      toast.success('Published! 🎉');
+      setIsPublished(true);
+      navigate(`/p/${data.slug}`);
+    }
     setPublishing(false);
+  };
+
+  const handleTagsChange = (value) => {
+    setTags(value);
+    const match = value.match(/#([a-zA-Z0-9_-]*)$/);
+    if (!match) {
+      setShowTopicPicker(false);
+      setTopicQuery('');
+      return;
+    }
+    setTopicQuery(match[1].toLowerCase());
+    setShowTopicPicker(true);
+  };
+
+  const applyTopic = (topic) => {
+    setTags((prev) => {
+      const next = prev.replace(/#([a-zA-Z0-9_-]*)$/, `#${topic.slug}`);
+      return /[,\s]$/.test(next) ? next : `${next} `;
+    });
+    setShowTopicPicker(false);
+    setTopicQuery('');
   };
 
   const words = wordCount(content);
@@ -245,7 +317,38 @@ export default function Editor() {
               </div>
               <div className="editor-extra-section">
                 <h4 className="extra-label">Tags</h4>
-                <input type="text" className="form-input" placeholder="tech, writing, science (comma separated)" value={tags} onChange={e=>setTags(e.target.value)}/>
+                <div className="topic-input-wrap">
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="tech, writing, science (use #topic for topics)"
+                    value={tags}
+                    onChange={(e) => handleTagsChange(e.target.value)}
+                  />
+                  {showTopicPicker && topics.length > 0 && (
+                    <div className="topic-suggestions">
+                      {topics
+                        .filter((t) =>
+                          topicQuery
+                            ? t.slug?.toLowerCase().includes(topicQuery) ||
+                              t.name?.toLowerCase().includes(topicQuery)
+                            : true
+                        )
+                        .slice(0, 6)
+                        .map((topic) => (
+                          <button
+                            key={topic.id}
+                            type="button"
+                            className="topic-suggestion"
+                            onClick={() => applyTopic(topic)}
+                          >
+                            <span className="topic-suggestion-name">#{topic.slug}</span>
+                            <span className="topic-suggestion-title">{topic.name}</span>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

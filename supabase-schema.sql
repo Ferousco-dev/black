@@ -158,7 +158,7 @@ CREATE TABLE public.email_subscriptions (
 CREATE TABLE public.notifications (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  type TEXT NOT NULL CHECK (type IN ('new_post', 'new_comment', 'new_follower', 'post_like', 'comment_reply')),
+  type TEXT NOT NULL CHECK (type IN ('new_post', 'new_comment', 'new_follower', 'post_like', 'comment_reply', 'post_mention')),
   title TEXT NOT NULL,
   body TEXT,
   link TEXT,

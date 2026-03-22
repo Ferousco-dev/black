@@ -639,6 +639,21 @@ DROP POLICY IF EXISTS "Topics are public" ON public.topics;
 CREATE POLICY "Topics are public"         ON public.topics      FOR SELECT USING (TRUE);
 DROP POLICY IF EXISTS "Post topics are public" ON public.post_topics;
 CREATE POLICY "Post topics are public"    ON public.post_topics FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Authors manage post topics" ON public.post_topics;
+CREATE POLICY "Authors manage post topics" ON public.post_topics
+  FOR ALL
+  USING (
+    EXISTS(
+      SELECT 1 FROM public.posts
+      WHERE id = post_id AND author_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS(
+      SELECT 1 FROM public.posts
+      WHERE id = post_id AND author_id = auth.uid()
+    )
+  );
 
 -- AUDIO
 DROP POLICY IF EXISTS "Audio tracks are public" ON public.audio_tracks;
@@ -798,7 +813,7 @@ ALTER TABLE public.notifications
 
 ALTER TABLE public.notifications
   ADD CONSTRAINT notifications_type_check CHECK (type IN (
-    'new_post', 'new_comment', 'new_follower', 'post_like', 'comment_reply',
+    'new_post', 'new_comment', 'new_follower', 'post_like', 'comment_reply', 'post_mention',
     'new_reaction', 'new_highlight', 'new_tip', 'new_paid_subscriber',
     'new_question', 'milestone', 'new_chat_message',
     'admin_broadcast', 'admin_warning', 'admin_update'

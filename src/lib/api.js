@@ -219,6 +219,19 @@ export const getPostsByTags = async (tags = [], excludePostId = null, limit = 6)
   return { data, error };
 };
 
+export const setPostTopics = async (postId, topicIds = []) => {
+  if (!postId) return { error: null };
+  const { error: deleteError } = await supabase
+    .from('post_topics')
+    .delete()
+    .eq('post_id', postId);
+  if (deleteError) return { error: deleteError };
+  if (!topicIds.length) return { error: null };
+  const rows = topicIds.map((topicId) => ({ post_id: postId, topic_id: topicId }));
+  const { error } = await supabase.from('post_topics').insert(rows);
+  return { error };
+};
+
 export const getForYouFeed = async (userId, page = 1, limit = 15) => {
   const fetchLimit = page * limit + 10;
 
@@ -1074,6 +1087,25 @@ const truncateText = (text = "", max = 120) => {
   return `${text.slice(0, max - 1)}…`;
 };
 
+const extractMentions = (text = "") => {
+  const mentions = new Set();
+  const regex = /(^|[^a-zA-Z0-9_-])@([a-zA-Z0-9_-]{2,30})/g;
+  let match = null;
+  while ((match = regex.exec(text)) !== null) {
+    mentions.add(match[2].toLowerCase());
+  }
+  return Array.from(mentions);
+};
+
+const getProfilesByUsernames = async (usernames = []) => {
+  if (!usernames.length) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, username")
+    .in("username", usernames);
+  return data || [];
+};
+
 const getProfileLite = async (userId) => {
   const { data } = await supabase
     .from("profiles")
@@ -1165,6 +1197,41 @@ const maybeNotifyOnComment = async ({ postId, comment, parentId, authorId }) => 
       });
     }
   }
+};
+
+export const notifyPostMentions = async ({
+  actorId,
+  isVerified,
+  post,
+  title = "",
+  subtitle = "",
+  content = "",
+}) => {
+  if (!actorId || !isVerified || !post?.id || !post?.slug) return;
+  const plain = content.replace(/<[^>]+>/g, " ");
+  const mentions = extractMentions([title, subtitle, plain].join(" "));
+  if (!mentions.length) return;
+
+  const profiles = await getProfilesByUsernames(mentions);
+  if (!profiles.length) return;
+
+  const actor = await getProfileLite(actorId);
+  const actorName = actor?.full_name || actor?.username || "Someone";
+  const targets = profiles.filter((p) => p.id && p.id !== actorId);
+
+  await Promise.all(
+    targets.map((p) =>
+      createNotification({
+        userId: p.id,
+        type: "post_mention",
+        title: `${actorName} mentioned you in a post`,
+        body: post.title,
+        link: `/p/${post.slug}`,
+        actorId,
+        postId: post.id,
+      })
+    )
+  );
 };
 
 // ============================================================

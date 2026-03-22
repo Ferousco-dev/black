@@ -99,6 +99,48 @@
 .editor-extras { margin-top: 28px; border-top: 1px solid var(--border-light); padding-top: 24px; display: flex; flex-direction: column; gap: 24px; }
 .editor-extra-section { }
 .extra-label { font-size: 0.825rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 10px; }
+.topic-input-wrap { position: relative; }
+.topic-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+}
+.topic-suggestion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  gap: 10px;
+  padding: 8px 10px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.topic-suggestion:hover {
+  background: var(--off-white);
+}
+.topic-suggestion-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.topic-suggestion-title {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
 .pdf-attached {
   display: flex;
   align-items: center;

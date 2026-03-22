@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import toast from 'react-hot-toast';
@@ -10,6 +10,7 @@ export default function Highlights({ postId, containerRef, onShareQuote }) {
   const [showPopover, setShowPopover] = useState(false);
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
   const [selectedText, setSelectedText] = useState('');
+  const lastScrollAt = useRef(0);
 
   useEffect(() => { load(); }, [postId]);
 
@@ -19,6 +20,10 @@ export default function Highlights({ postId, containerRef, onShareQuote }) {
   }
 
   const handleMouseUp = useCallback(() => {
+    if (Date.now() - lastScrollAt.current < 200) {
+      setShowPopover(false);
+      return;
+    }
     const sel = window.getSelection();
     const text = sel?.toString().trim();
     if (!text || text.length < 10 || text.length > 500) { setShowPopover(false); return; }
@@ -38,6 +43,15 @@ export default function Highlights({ postId, containerRef, onShareQuote }) {
     target.addEventListener('mouseup', handleMouseUp);
     return () => target.removeEventListener('mouseup', handleMouseUp);
   }, [handleMouseUp, containerRef]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      lastScrollAt.current = Date.now();
+      if (showPopover) setShowPopover(false);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showPopover]);
 
   async function saveHighlight() {
     if (!user) { toast.error('Sign in to save highlights'); return; }
