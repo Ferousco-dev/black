@@ -221,18 +221,13 @@ h4, h5, h6 { font-family: var(--font-sans); font-weight: 600; }
 .verified-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 2px 8px;
+  padding: 0;
   border-radius: 999px;
-  background: var(--accent);
-  color: var(--text-on-accent);
-  font-size: 0.7rem;
-  font-weight: 600;
+  color: #111;
   line-height: 1;
 }
-.verified-badge svg { width: 12px; height: 12px; }
-.verified-badge-sm { padding: 2px 6px; }
-.verified-badge-sm .verified-badge-text { display: none; }
+.verified-badge svg { width: 16px; height: 16px; }
+.verified-badge-sm svg { width: 14px; height: 14px; }
 
 /* LOADING */
 .spinner {

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useNotifications } from "../../hooks/useNotifications";
 import {
   getTheme,
   toggleTheme,
@@ -14,6 +15,7 @@ import "./Navbar.css";
 
 export default function Navbar() {
   const { user, profile } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -736,7 +738,7 @@ export default function Navbar() {
               strokeLinejoin="round"
             />
           </svg>
-          <span>Discover</span>
+          <span>Home</span>
         </Link>
         <Link
           to="/search"
@@ -756,12 +758,11 @@ export default function Navbar() {
         >
           <span className="mobile-bottom-action">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" fill="currentColor" />
               <path
-                d="M12 8v8M8 12h8"
+                d="M12 6v12M6 12h12"
                 fill="none"
-                stroke="var(--text-on-accent)"
-                strokeWidth="2"
+                stroke="currentColor"
+                strokeWidth="2.5"
                 strokeLinecap="round"
               />
             </svg>
@@ -782,6 +783,7 @@ export default function Navbar() {
             />
             <path d="M8 9h8M8 13h8" fill="none" stroke="currentColor" strokeWidth="2" />
           </svg>
+          {unreadCount > 0 && <span className="nav-badge" aria-hidden="true" />}
           <span>Feed</span>
         </Link>
         <Link
