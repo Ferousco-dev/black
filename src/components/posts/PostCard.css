@@ -3,12 +3,23 @@
   border-bottom: 1px solid var(--border);
   padding: 30px 0;
   transition: none;
+  border-radius: 0;
 }
 .post-card:first-child {
   border-radius: 16px 16px 0 0;
 }
 .post-card:last-child {
   border-bottom: none;
+  border-radius: 0 0 16px 16px;
+}
+
+.posts-list .post-card {
+  border-radius: 0;
+}
+.posts-list .post-card:first-child {
+  border-radius: 16px 16px 0 0;
+}
+.posts-list .post-card:last-child {
   border-radius: 0 0 16px 16px;
 }
 .post-card-author {
