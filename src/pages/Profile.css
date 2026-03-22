@@ -2,17 +2,17 @@
 .profile-twitter {
   background: var(--bg-color);
   min-height: 100vh;
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 0 20px 60px;
+  padding: 0 16px 60px;
 }
 
 /* Header */
 .profile-header-twitter {
   position: relative;
   z-index: 2;
-  --cover-height: 200px;
-  --avatar-size: 112px;
+  --cover-height: 140px;
+  --avatar-size: 96px;
   --avatar-border: 3px;
   --header-padding-inline: 0px;
   background: transparent;
@@ -23,11 +23,11 @@
 .profile-cover-twitter {
   width: 100%;
   height: var(--cover-height);
-  background: linear-gradient(135deg, var(--accent-soft), rgba(122,162,255,0.08));
+  background: var(--off-white);
   overflow: hidden;
   position: relative;
   z-index: 1;
-  border-radius: 18px;
+  border-radius: 0 0 14px 0;
 }
 
 .profile-cover-twitter::after {
@@ -36,8 +36,8 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(10, 14, 25, 0.05) 0%,
-    rgba(10, 14, 25, 0.22) 100%
+    rgba(10, 14, 25, 0.02) 0%,
+    rgba(10, 14, 25, 0.16) 100%
   );
 }
 
@@ -46,19 +46,42 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 0 0 14px 0;
+}
+
+.profile-cover-note {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  text-align: right;
+  color: var(--text-secondary);
+  z-index: 2;
+}
+.profile-cover-quote {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.profile-cover-brand {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
 .profile-header-info-twitter {
   position: relative;
   z-index: 3;
-  padding: calc(var(--avatar-size) / 2 + 18px) 0 10px;
+  padding: calc(var(--avatar-size) / 2 + 14px) 0 10px;
   background: transparent;
 }
 
 .profile-avatar-twitter {
   position: absolute;
   top: calc(var(--avatar-size) / -2);
-  left: 18px;
+  left: 0;
   z-index: 2;
 }
 
@@ -112,7 +135,7 @@
 
 .profile-header-top-twitter {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 12px;
@@ -132,7 +155,7 @@
 
 .profile-name-twitter {
   font-family: var(--font-serif);
-  font-size: 1.65rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 4px 0;
@@ -141,7 +164,7 @@
 }
 
 .profile-handle-twitter {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
   margin: 0;
   font-weight: 500;
@@ -157,7 +180,7 @@
 .btn-twitter {
   padding: 9px 18px;
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
@@ -194,13 +217,13 @@
   font-size: 0.98rem;
   color: var(--text-secondary);
   line-height: 1.7;
-  margin: 8px 0 16px 0;
+  margin: 8px 0 18px 0;
 }
 
 .profile-stats-twitter {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
   padding-top: 14px;
   border-top: 1px solid var(--border-light);
 }
@@ -258,26 +281,26 @@
 /* Tabs */
 .tabs-twitter {
   display: flex;
-  gap: 18px;
+  gap: 20px;
   border-bottom: 1px solid var(--border-light);
   position: static;
-  margin-top: 10px;
+  margin-top: 12px;
   background: transparent;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 }
 
 .tab-twitter {
-  padding: 10px 0;
+  padding: 8px 0;
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
 }
 
 .tab-twitter:hover {
@@ -292,7 +315,7 @@
 .tab-twitter.active::after {
   content: "";
   position: absolute;
-  bottom: -8px;
+  bottom: -7px;
   left: 0;
   right: 0;
   height: 2px;
@@ -301,9 +324,10 @@
 
 /* Feed */
 .feed-twitter {
-  padding: 8px 0 0;
+  padding: 10px 0 0;
   background: transparent;
 }
+
 
 .empty-twitter {
   text-align: center;
@@ -522,7 +546,7 @@
 
   .profile-header-twitter {
     --cover-height: 180px;
-    --avatar-size: 96px;
+    --avatar-size: 88px;
     --header-padding-inline: 16px;
   }
 

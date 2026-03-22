@@ -292,6 +292,10 @@ export default function Profile() {
           {profile.cover_image_url && (
             <img src={profile.cover_image_url} alt="Cover" />
           )}
+          <div className="profile-cover-note">
+            <p className="profile-cover-quote">“Read deeply. Write clearly.”</p>
+            <span className="profile-cover-brand">Chronicles</span>
+          </div>
         </div>
 
         <div className="profile-header-info-twitter">
