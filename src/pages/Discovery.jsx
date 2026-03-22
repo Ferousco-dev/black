@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import LoadingPage from '../components/ui/LoadingPage';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Discovery.css';
 
@@ -136,7 +137,10 @@ export default function Discovery() {
                   <Link key={p.id} to={`/@${p.username}`} className="featured-writer-card">
                     <img src={p.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${p.username}`} className="featured-avatar" alt=""/>
                     <div className="featured-info">
-                      <span className="featured-name">{p.publication_name || p.full_name || p.username}</span>
+                      <span className="featured-name-row">
+                        <span className="featured-name">{p.publication_name || p.full_name || p.username}</span>
+                        {p.is_verified && <VerifiedBadge size="sm" />}
+                      </span>
                       <span className="featured-username">@{p.username}</span>
                       {p.bio && <p className="featured-bio">{p.bio.slice(0,100)}</p>}
                     </div>
@@ -180,7 +184,10 @@ function PostRow({ post }) {
       <div className="post-card-header">
         <img src={post.author_avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${post.author_username}`} className="post-card-avatar" alt=""/>
         <div className="post-card-author">
-          <span className="post-card-name">{post.author_full_name || post.author_username}</span>
+          <span className="post-card-name-row">
+            <span className="post-card-name">{post.author_full_name || post.author_username}</span>
+            {post.author_is_verified && <VerifiedBadge size="sm" />}
+          </span>
           <span className="post-card-handle">
             @{post.author_username}
             {timeLabel && <span className="post-card-time"> · {timeLabel}</span>}

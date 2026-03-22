@@ -11,6 +11,7 @@ import {
   getAdminCommentsExport,
   setUserSuspended,
   setUserRole,
+  setUserVerified,
   forceUserLogout,
   getAdminUserHistory,
   getAdminBroadcasts,
@@ -27,6 +28,7 @@ import {
 } from "../lib/api";
 import { useAuth } from "../hooks/useAuth";
 import AdminGrowthCard from "../components/share/AdminGrowthCard";
+import VerifiedBadge from "../components/ui/VerifiedBadge";
 import toast from "react-hot-toast";
 import LoadingPage from "../components/ui/LoadingPage";
 import { buildCacheKey, getCache, setCache } from "../lib/cache";
@@ -280,6 +282,17 @@ export default function Admin() {
     }
   };
 
+  const handleVerifyToggle = async (user) => {
+    const { error } = await setUserVerified({ userId: user.id, isVerified: !user.is_verified });
+    if (error) toast.error("Could not update verification");
+    else {
+      toast.success(user.is_verified ? "Verification removed" : "User verified");
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, is_verified: !user.is_verified } : u))
+      );
+    }
+  };
+
   const handleForceLogout = async (user) => {
     const { error } = await forceUserLogout({ userId: user.id });
     if (error) toast.error("Could not force logout");
@@ -462,6 +475,7 @@ export default function Admin() {
       full_name: user.full_name || "",
       created_at: user.created_at,
       is_admin: user.is_admin ? "yes" : "no",
+      is_verified: user.is_verified ? "yes" : "no",
       is_suspended: user.is_suspended ? "yes" : "no",
       suspended_at: user.suspended_at || "",
       suspended_reason: user.suspended_reason || "",
@@ -759,7 +773,10 @@ export default function Admin() {
                             <div className="admin-user-avatar">{user.username?.[0]?.toUpperCase() || "U"}</div>
                           )}
                           <div>
-                            <div className="admin-user-name">{user.full_name || user.username}</div>
+                            <div className="admin-user-name">
+                              <span>{user.full_name || user.username}</span>
+                              {user.is_verified && <VerifiedBadge size="sm" />}
+                            </div>
                             <div className="admin-user-handle">@{user.username}</div>
                           </div>
                         </div>
@@ -774,6 +791,9 @@ export default function Admin() {
                           </button>
                           <button className="btn btn-secondary btn-sm" onClick={() => handleRoleToggle(user)}>
                             {user.is_admin ? "Remove admin" : "Make admin"}
+                          </button>
+                          <button className="btn btn-secondary btn-sm" onClick={() => handleVerifyToggle(user)}>
+                            {user.is_verified ? "Remove badge" : "Verify"}
                           </button>
                           <button className="btn btn-secondary btn-sm" onClick={() => handleForceLogout(user)}>
                             Force logout

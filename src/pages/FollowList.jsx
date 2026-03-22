@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { getProfileByUsername, getFollowers, getFollowing } from '../lib/api';
 import LoadingPage from '../components/ui/LoadingPage';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './FollowList.css';
 
@@ -71,7 +72,10 @@ export default function FollowList() {
                     : <div className="avatar-placeholder" style={{ width: 44, height: 44, fontSize: '0.95rem' }}>{initials}</div>
                   }
                   <div className="followlist-user-info">
-                    <div className="followlist-user-name">{u.full_name || u.username}</div>
+                    <div className="followlist-user-name-row">
+                      <span className="followlist-user-name">{u.full_name || u.username}</span>
+                      {u.is_verified && <VerifiedBadge size="sm" />}
+                    </div>
                     <div className="followlist-user-handle">@{u.username}</div>
                     {u.bio && <div className="followlist-user-bio">{u.bio.slice(0, 80)}{u.bio.length > 80 ? '…' : ''}</div>}
                   </div>

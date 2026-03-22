@@ -417,7 +417,9 @@ export const getAdminMetrics = async () => {
 export const getAdminUsers = async ({ limit = 50, query = "", status = "all", role = "all" } = {}) => {
   let request = supabase
     .from("profiles")
-    .select("id, username, full_name, avatar_url, created_at, is_admin, is_suspended, suspended_at, force_logout_at")
+    .select(
+      "id, username, full_name, avatar_url, created_at, is_admin, is_verified, is_suspended, suspended_at, force_logout_at"
+    )
     .order("created_at", { ascending: false });
 
   if (query) {
@@ -435,9 +437,20 @@ export const getAdminUsers = async ({ limit = 50, query = "", status = "all", ro
 export const getAdminUsersExport = async () =>
   fetchAllRows({
     table: "profiles",
-    select: "id, username, full_name, created_at, is_admin, is_suspended, suspended_at, suspended_reason",
+    select:
+      "id, username, full_name, created_at, is_admin, is_verified, is_suspended, suspended_at, suspended_reason",
     orderBy: { column: "created_at", ascending: false },
   });
+
+export const setUserVerified = async ({ userId, isVerified }) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ is_verified: isVerified })
+    .eq("id", userId)
+    .select()
+    .single();
+  return { data, error };
+};
 
 export const getAdminPosts = async (limit = 50) => {
   const { data, error } = await supabase
@@ -896,7 +909,7 @@ export const getFollowers = async (userId) => {
   const { data, error } = await supabase
     .from("follows")
     .select(
-      "follower:profiles!follower_id(id, username, full_name, avatar_url)"
+      "follower:profiles!follower_id(id, username, full_name, avatar_url, is_verified)"
     )
     .eq("following_id", userId);
   return { data: data?.map((d) => d.follower), error };
@@ -906,7 +919,7 @@ export const getFollowing = async (userId) => {
   const { data, error } = await supabase
     .from("follows")
     .select(
-      "following:profiles!following_id(id, username, full_name, avatar_url)"
+      "following:profiles!following_id(id, username, full_name, avatar_url, is_verified)"
     )
     .eq("follower_id", userId);
   return { data: data?.map((d) => d.following), error };

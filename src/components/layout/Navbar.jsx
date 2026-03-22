@@ -23,9 +23,11 @@ export default function Navbar() {
   const [theme, setTheme] = useState(getTheme());
   const [resumeOpen, setResumeOpen] = useState(false);
   const [resumeItems, setResumeItems] = useState([]);
+  const [bottomHidden, setBottomHidden] = useState(false);
   const menuRef = useRef(null);
   const searchRef = useRef(null);
   const resumeRef = useRef(null);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -51,6 +53,24 @@ export default function Navbar() {
       applyTheme(next);
       setTheme(next);
     });
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      const lastY = lastScrollYRef.current;
+      const scrollingDown = currentY > lastY;
+      lastScrollYRef.current = currentY;
+
+      if (currentY < 80) {
+        setBottomHidden(false);
+        return;
+      }
+      if (scrollingDown) setBottomHidden(true);
+      else setBottomHidden(false);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleSignOut = async () => {
@@ -92,9 +112,13 @@ export default function Navbar() {
     }
   };
 
+  const profilePath = user ? `/@${profile?.username}` : "/signin";
+  const bottomNavHidden = bottomHidden || mobileOpen;
+
   return (
-    <nav className="navbar">
-      <div className="navbar-inner container-wide">
+    <>
+      <nav className="navbar">
+        <div className="navbar-inner container-wide">
         <Link to="/" className="navbar-logo">
           <span className="logo-mark">●</span>
           <span className="logo-text">Chronicles</span>
@@ -436,20 +460,6 @@ export default function Navbar() {
           {/* Explore Section */}
           <div className="mobile-menu-section">
             <div className="mobile-section-title">Explore</div>
-            <Link to="/" className="mobile-link-item">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              <span>Discover</span>
-            </Link>
             {user && (
               <Link to="/for-you" className="mobile-link-item">
                 <svg
@@ -478,36 +488,6 @@ export default function Navbar() {
                 <path d="M12 3v18M3 12h18" />
               </svg>
               <span>Topics</span>
-            </Link>
-            {user && (
-              <Link to="/feed" className="mobile-link-item">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span>Feed</span>
-              </Link>
-            )}
-            <Link to="/search" className="mobile-link-item">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              <span>Search</span>
             </Link>
             <button className="mobile-link-item" onClick={handleThemeToggle}>
               {theme === "dark" ? (
@@ -587,22 +567,6 @@ export default function Navbar() {
                   </svg>
                   <span>Dashboard</span>
                 </Link>
-                <Link
-                  to="/dashboard/new"
-                  className="mobile-link-item mobile-link-highlight"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  <span>New Post</span>
-                </Link>
                 <Link to="/bookmarks" className="mobile-link-item">
                   <svg
                     width="20"
@@ -637,23 +601,6 @@ export default function Navbar() {
               {/* Activity Section */}
               <div className="mobile-menu-section">
                 <div className="mobile-section-title">Activity</div>
-                <Link
-                  to={"/@" + profile?.username}
-                  className="mobile-link-item"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span>Profile</span>
-                </Link>
                 <Link to="/notifications" className="mobile-link-item">
                   <svg
                     width="20"
@@ -755,6 +702,105 @@ export default function Navbar() {
           )}
         </div>
       </div>
-    </nav>
+
+      </nav>
+      <div className={`mobile-bottom-nav${bottomNavHidden ? " hidden" : ""}`}>
+        <Link
+          to="/"
+          className={`mobile-bottom-link${location.pathname === "/" ? " active" : ""}`}
+          aria-label="Discover"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M3 10.5l9-7 9 7"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M5 10v9h14v-9"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M9 19v-6h6v6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>Discover</span>
+        </Link>
+        <Link
+          to="/search"
+          className={`mobile-bottom-link${location.pathname.startsWith("/search") ? " active" : ""}`}
+          aria-label="Search"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" />
+            <path d="m21 21-4.35-4.35" fill="none" stroke="currentColor" strokeWidth="2" />
+          </svg>
+          <span>Search</span>
+        </Link>
+        <Link
+          to={user ? "/dashboard/new" : "/signin"}
+          className={`mobile-bottom-link${location.pathname === "/dashboard/new" ? " active" : ""}`}
+          aria-label="New post"
+        >
+          <span className="mobile-bottom-action">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" fill="currentColor" />
+              <path
+                d="M12 8v8M8 12h8"
+                fill="none"
+                stroke="var(--text-on-accent)"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
+          <span>New</span>
+        </Link>
+        <Link
+          to={user ? "/feed" : "/signin"}
+          className={`mobile-bottom-link${location.pathname === "/feed" ? " active" : ""}`}
+          aria-label="Feed"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 5h16v14H4z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+            <path d="M8 9h8M8 13h8" fill="none" stroke="currentColor" strokeWidth="2" />
+          </svg>
+          <span>Feed</span>
+        </Link>
+        <Link
+          to={profilePath}
+          className={`mobile-bottom-link${location.pathname.startsWith("/@") ? " active" : ""}`}
+          aria-label="Profile"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
+            <path
+              d="M4 20a8 8 0 0 1 16 0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+          </svg>
+          <span>Profile</span>
+        </Link>
+      </div>
+    </>
   );
 }

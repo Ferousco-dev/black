@@ -16,6 +16,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import PostCard from "../components/posts/PostCard";
 import ProfileStatsCard from "../components/share/ProfileStatsCard";
+import VerifiedBadge from "../components/ui/VerifiedBadge";
 import toast from "react-hot-toast";
 import LoadingPage from "../components/ui/LoadingPage";
 import { buildCacheKey, getCache, setCache } from "../lib/cache";
@@ -310,11 +311,14 @@ export default function Profile() {
 
           <div className="profile-header-top-twitter">
             <div className="profile-info-twitter">
-              <h1 className="profile-name-twitter">
-                {profile.publication_name ||
-                  profile.full_name ||
-                  profile.username}
-              </h1>
+              <div className="profile-name-row">
+                <h1 className="profile-name-twitter">
+                  {profile.publication_name ||
+                    profile.full_name ||
+                    profile.username}
+                </h1>
+                {profile.is_verified && <VerifiedBadge />}
+              </div>
               <p className="profile-handle-twitter">@{profile.username}</p>
             </div>
 

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
+import VerifiedBadge from '../ui/VerifiedBadge';
 import './PostCard.css';
 
 export default function PostCard({ post, showAuthor = true }) {
@@ -19,6 +20,7 @@ export default function PostCard({ post, showAuthor = true }) {
               : <div className="avatar-placeholder" style={{ width: 28, height: 28, fontSize: '0.7rem' }}>{initials}</div>
             }
             <span className="author-name">{post.author_full_name || post.author_username}</span>
+            {post.author_is_verified && <VerifiedBadge size="sm" />}
           </Link>
           <span className="post-date">{timeAgo}</span>
         </div>

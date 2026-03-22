@@ -1,6 +1,7 @@
 .post-view-page { padding: 3rem 0 5rem; }
 .post-view-author { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
 .post-view-author-link { display: flex; align-items: center; gap: 12px; }
+.author-name-row { display: flex; align-items: center; gap: 6px; }
 .author-fullname { font-weight: 600; font-size: 0.95rem; }
 .author-meta { font-size: 0.8rem; color: var(--text-muted); }
 .post-view-header { margin-bottom: 2rem; }
@@ -27,6 +28,7 @@
 .post-view-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 2.5rem; }
 .author-card { padding: 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 3rem; }
 .author-card-link { display: flex; align-items: center; gap: 14px; flex: 1; }
+.author-card-name-row { display: flex; align-items: center; gap: 6px; }
 .author-card-name { font-weight: 600; font-size: 1rem; }
 .author-card-handle { font-size: 0.8rem; color: var(--text-muted); }
 

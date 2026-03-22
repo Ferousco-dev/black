@@ -30,6 +30,7 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS newsletter_header_html   TEXT,
   ADD COLUMN IF NOT EXISTS newsletter_footer_html   TEXT,
   ADD COLUMN IF NOT EXISTS welcome_email_html       TEXT,
+  ADD COLUMN IF NOT EXISTS is_verified              BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS is_admin                 BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS is_suspended             BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS suspended_at             TIMESTAMPTZ,
@@ -772,6 +773,7 @@ SELECT
   pr.publication_name     AS publication_name,
   pr.accent_color         AS author_accent_color,
   pr.paid_tier_enabled    AS author_paid_tier,
+  pr.is_verified          AS author_is_verified,
   COUNT(DISTINCT pl.id)   AS like_count,
   COUNT(DISTINCT c.id)    AS comment_count,
   COUNT(DISTINCT b.id)    AS bookmark_count,
@@ -786,7 +788,7 @@ LEFT JOIN public.bookmarks b      ON p.id = b.post_id
 LEFT JOIN public.post_reactions pr2 ON p.id = pr2.post_id
 LEFT JOIN public.highlights h     ON p.id = h.post_id AND h.is_public = TRUE
 GROUP BY p.id, pr.username, pr.full_name, pr.avatar_url,
-         pr.publication_name, pr.accent_color, pr.paid_tier_enabled;
+         pr.publication_name, pr.accent_color, pr.paid_tier_enabled, pr.is_verified;
 
 -- ============================================================
 -- 19. NOTIFICATIONS: add new types

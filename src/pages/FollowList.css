@@ -6,6 +6,7 @@
 .followlist-user { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; transition: box-shadow 0.15s; }
 .followlist-user:hover { box-shadow: var(--shadow); }
 .followlist-user-info { flex: 1; }
+.followlist-user-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .followlist-user-name { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
 .followlist-user-handle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
 .followlist-user-bio { font-size: 0.85rem; color: var(--text-secondary); }

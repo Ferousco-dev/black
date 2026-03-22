@@ -13,6 +13,7 @@ import PostCard from '../components/posts/PostCard';
 import { randomGradient } from '../utils/randomGradient';
 import toast from 'react-hot-toast';
 import LoadingPage from '../components/ui/LoadingPage';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './PostView.css';
 
@@ -337,7 +338,10 @@ export default function PostView() {
               : <div className="avatar-placeholder" style={{ width: 44, height: 44, fontSize: '1rem' }}>{initials}</div>
             }
             <div>
-              <div className="author-fullname">{post.author_full_name || post.author_username}</div>
+              <div className="author-name-row">
+                <span className="author-fullname">{post.author_full_name || post.author_username}</span>
+                {post.author_is_verified && <VerifiedBadge size="sm" />}
+              </div>
               <div className="author-meta">@{post.author_username} · {timeAgo}</div>
             </div>
           </Link>
@@ -448,7 +452,10 @@ export default function PostView() {
               : <div className="avatar-placeholder" style={{ width: 56, height: 56, fontSize: '1.2rem' }}>{initials}</div>
             }
             <div className="author-card-info">
-              <div className="author-card-name">{post.author_full_name || post.author_username}</div>
+              <div className="author-card-name-row">
+                <span className="author-card-name">{post.author_full_name || post.author_username}</span>
+                {post.author_is_verified && <VerifiedBadge size="sm" />}
+              </div>
               <div className="author-card-handle">@{post.author_username}</div>
             </div>
           </Link>

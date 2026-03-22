@@ -47,10 +47,10 @@
 
 .admin-user { display: flex; align-items: center; gap: 10px; }
 .admin-user img, .admin-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-weight: 700; }
-.admin-user-name { font-weight: 600; }
+.admin-user-name { display: flex; align-items: center; gap: 6px; font-weight: 600; flex-wrap: wrap; }
 .admin-user-handle { font-size: 0.75rem; color: var(--text-muted); }
 
-.admin-actions { display: flex; gap: 8px; }
+.admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .admin-status.active { color: var(--success); font-weight: 600; }
 .admin-status.suspended { color: var(--danger); font-weight: 600; }
 

@@ -17,6 +17,7 @@ CREATE TABLE public.profiles (
   avatar_url TEXT,
   website TEXT,
   twitter_handle TEXT,
+  is_verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -273,6 +274,7 @@ SELECT
   pr.username AS author_username,
   pr.full_name AS author_full_name,
   pr.avatar_url AS author_avatar_url,
+  pr.is_verified AS author_is_verified,
   COUNT(DISTINCT pl.id) AS like_count,
   COUNT(DISTINCT c.id) AS comment_count,
   COUNT(DISTINCT b.id) AS bookmark_count
@@ -281,7 +283,7 @@ JOIN public.profiles pr ON p.author_id = pr.id
 LEFT JOIN public.post_likes pl ON p.id = pl.post_id
 LEFT JOIN public.comments c ON p.id = c.post_id
 LEFT JOIN public.bookmarks b ON p.id = b.post_id
-GROUP BY p.id, pr.username, pr.full_name, pr.avatar_url;
+GROUP BY p.id, pr.username, pr.full_name, pr.avatar_url, pr.is_verified;
 
 -- ============================================================
 -- FULL TEXT SEARCH

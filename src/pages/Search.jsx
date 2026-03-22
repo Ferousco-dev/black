@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { searchPosts, searchAuthors } from '../lib/api';
 import PostCard from '../components/posts/PostCard';
 import LoadingPage from '../components/ui/LoadingPage';
+import VerifiedBadge from '../components/ui/VerifiedBadge';
 import { buildCacheKey, getCache, setCache } from '../lib/cache';
 import './Search.css';
 
@@ -98,7 +99,10 @@ export default function Search() {
                           : <div className="avatar-placeholder" style={{ width: 48, height: 48 }}>{initials}</div>
                         }
                         <div>
-                          <div className="author-result-name">{author.full_name || author.username}</div>
+                          <div className="author-result-name-row">
+                            <span className="author-result-name">{author.full_name || author.username}</span>
+                            {author.is_verified && <VerifiedBadge size="sm" />}
+                          </div>
                           <div className="author-result-handle">@{author.username}</div>
                           {author.bio && <div className="author-result-bio">{author.bio.slice(0, 80)}{author.bio.length > 80 ? '…' : ''}</div>}
                         </div>
