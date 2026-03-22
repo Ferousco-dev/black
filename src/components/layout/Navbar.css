@@ -503,6 +503,14 @@
   stroke: currentColor;
 }
 
+.mobile-bottom-link.new-action .mobile-bottom-action {
+  transform: translateY(-6px);
+}
+
+.mobile-bottom-link.new-action span:last-child {
+  margin-top: -2px;
+}
+
 .nav-badge {
   position: absolute;
   top: 1px;

@@ -715,7 +715,7 @@ export default function Navbar() {
         </Link>
         <Link
           to={user ? "/dashboard/new" : "/signin"}
-          className={`mobile-bottom-link${location.pathname === "/dashboard/new" ? " active" : ""}`}
+          className={`mobile-bottom-link new-action${location.pathname === "/dashboard/new" ? " active" : ""}`}
           aria-label="New post"
         >
           <span className="mobile-bottom-action">
